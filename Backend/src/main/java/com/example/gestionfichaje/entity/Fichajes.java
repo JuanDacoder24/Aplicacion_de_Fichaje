@@ -1,0 +1,112 @@
+package com.example.gestionfichaje.entity;
+
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.util.List;
+
+import jakarta.persistence.CascadeType;
+import jakarta.persistence.Entity;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.OneToMany;
+import jakarta.persistence.OneToOne;
+import jakarta.persistence.Table;
+
+@Entity
+@Table(name = "fichajes")
+public class Fichajes {
+
+    private int id;
+    // Muchos fichajes pueden pertenecer a un usuario
+    @ManyToOne
+    @JoinColumn(name = "usuario_id")
+    private Usuarios usuario;
+    private LocalDate fecha;
+    private LocalDateTime hora_entrada;
+    private LocalDateTime hora_salida;
+    private int descanso_minutos;
+    private double horas_trabajadas;
+
+    // En Fichajes.java — un fichaje tiene hasta 2 ubicaciones (entrada y salida)
+    @OneToMany(mappedBy = "fichaje", cascade = CascadeType.ALL)
+    private List<Ubicacion> ubicacion;
+
+    // Un fichaje tiene muchas pausas
+    @OneToOne(mappedBy = "fichaje", cascade = CascadeType.ALL)
+    private List<Pausas> pausas;
+
+    // Un fichaje puede tener muchas solicitudes
+    @OneToMany(mappedBy = "fichaje", cascade = CascadeType.ALL)
+    private List<Solicitudes> solicitudes;
+
+    public Fichajes() {
+    }
+
+    public Fichajes(int id, Usuarios usuario, LocalDate fecha, LocalDateTime hora_entrada, LocalDateTime hora_salida,
+            int descanso_minutos, double horas_trabajadas) {
+        this.id = id;
+        this.usuario = usuario;
+        this.fecha = fecha;
+        this.hora_entrada = hora_entrada;
+        this.hora_salida = hora_salida;
+        this.descanso_minutos = descanso_minutos;
+        this.horas_trabajadas = horas_trabajadas;
+    }
+
+    public int getId() {
+        return id;
+    }
+
+    public void setId(int id) {
+        this.id = id;
+    }
+
+    public Usuarios getUsuario() {
+        return usuario;
+    }
+
+    public void setUsuario(Usuarios usuario) {
+        this.usuario = usuario;
+    }
+
+    public LocalDate getFecha() {
+        return fecha;
+    }
+
+    public void setFecha(LocalDate fecha) {
+        this.fecha = fecha;
+    }
+
+    public LocalDateTime getHora_entrada() {
+        return hora_entrada;
+    }
+
+    public void setHora_entrada(LocalDateTime hora_entrada) {
+        this.hora_entrada = hora_entrada;
+    }
+
+    public LocalDateTime getHora_salida() {
+        return hora_salida;
+    }
+
+    public void setHora_salida(LocalDateTime hora_salida) {
+        this.hora_salida = hora_salida;
+    }
+
+    public int getDescanso_minutos() {
+        return descanso_minutos;
+    }
+
+    public void setDescanso_minutos(int descanso_minutos) {
+        this.descanso_minutos = descanso_minutos;
+    }
+
+    public double getHoras_trabajadas() {
+        return horas_trabajadas;
+    }
+
+    public void setHoras_trabajadas(double horas_trabajadas) {
+        this.horas_trabajadas = horas_trabajadas;
+    }
+
+}
