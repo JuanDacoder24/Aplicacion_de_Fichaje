@@ -1,13 +1,14 @@
 package com.example.gestionfichaje.security;
 
 import java.security.Key;
-import java.sql.Date;
+import java.util.Date; // Cambiado de java.sql.Date a java.util.Date
 
 import org.springframework.stereotype.Component;
 
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.security.Keys;
+
 
 @Component
 public class JwtUtil {
