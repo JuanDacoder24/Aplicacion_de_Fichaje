@@ -2,16 +2,16 @@ package com.example.gestionfichaje.entity;
 
 public class LoginRequest {
     
-    private String username;
+    private String nombre;
     private String password;
 
-    public LoginRequest(String username, String password) {
-        this.username = username;
+    public LoginRequest(String nombre, String password) {
+        this.nombre = nombre;
         this.password = password;
     }
 
-    public String getUsername() {
-        return username;
+    public String getNombre() {
+        return nombre;
     }
 
     public String getPassword() {

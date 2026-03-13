@@ -44,11 +44,13 @@ public class Fichajes {
     @OneToMany(mappedBy = "fichaje", cascade = CascadeType.ALL)
     private List<Solicitudes> solicitudes;
 
+    private String comentario;
+
     public Fichajes() {
     }
 
     public Fichajes(int id, Usuarios usuario, LocalDate fecha, LocalDateTime hora_entrada, LocalDateTime hora_salida,
-            int descanso_minutos, double horas_trabajadas) {
+            int descanso_minutos, double horas_trabajadas, String comentario) {
         this.id = id;
         this.usuario = usuario;
         this.fecha = fecha;
@@ -56,6 +58,7 @@ public class Fichajes {
         this.hora_salida = hora_salida;
         this.descanso_minutos = descanso_minutos;
         this.horas_trabajadas = horas_trabajadas;
+        this.comentario = comentario;
     }
 
     public int getId() {
@@ -114,4 +117,35 @@ public class Fichajes {
         this.horas_trabajadas = horas_trabajadas;
     }
 
+    public List<Ubicacion> getUbicacion() {
+        return ubicacion;
+    }
+
+    public void setUbicacion(List<Ubicacion> ubicacion) {
+        this.ubicacion = ubicacion;
+    }
+
+    public List<Pausas> getPausas() {
+        return pausas;
+    }
+
+    public void setPausas(List<Pausas> pausas) {
+        this.pausas = pausas;
+    }
+
+    public List<Solicitudes> getSolicitudes() {
+        return solicitudes;
+    }
+
+    public void setSolicitudes(List<Solicitudes> solicitudes) {
+        this.solicitudes = solicitudes;
+    }
+
+    public String getComentario() {
+        return comentario;
+    }
+
+    public void setComentario(String comentario) {
+        this.comentario = comentario;
+    }
 }

@@ -1,11 +1,13 @@
 package com.example.gestionfichaje.controller;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
@@ -19,7 +21,6 @@ import com.example.gestionfichaje.entity.Solicitudes;
 import com.example.gestionfichaje.entity.Usuarios;
 import com.example.gestionfichaje.security.JwtUtil;
 import com.example.gestionfichaje.services.FichajeServices;
-import com.example.gestionfichaje.services.UserService;
 
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -33,16 +34,24 @@ import org.springframework.web.bind.annotation.RequestBody;
 @RequestMapping("/api")
 public class FichajeController {
 
+    @Autowired
     private FichajeServices fichajeServices;
-    private JwtUtil jwtUtil;
-    private UserDetailsService userDetailsService;
-    private UserService userService;
 
-    @PostMapping("/login")
+    @Autowired
+    private JwtUtil jwtUtil;
+
+    @Autowired
+    private UserDetailsService userDetailsService;
+    
+
+    @Autowired
+    private PasswordEncoder passwordEncoder;
+
+    @PostMapping("/auth/login")
     public ResponseEntity<?> login(@RequestBody LoginRequest request) {
         try{
-            UserDetails userDetails = userDetailsService.loadUserByUsername(request.getUsername());
-        if (userService.validatePassword(request.getPassword(), userDetails.getPassword())) {
+            UserDetails userDetails = userDetailsService.loadUserByUsername(request.getNombre());
+            if (passwordEncoder.matches(request.getPassword(), userDetails.getPassword())) {
                 return ResponseEntity.ok(new LoginResponse(jwtUtil.generateToken(userDetails.getUsername())));
             } else {
                 return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Usuario o contraseña incorrectos");
