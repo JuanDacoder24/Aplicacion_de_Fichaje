@@ -9,8 +9,7 @@ import com.example.gestionfichaje.repository.FichajesRepository;
 import com.example.gestionfichaje.repository.HorariosRepository;
 import com.example.gestionfichaje.repository.SolicitudesRepository;
 import com.example.gestionfichaje.repository.UsuariosRepository;
-
-import ch.qos.logback.core.util.Duration;
+import java.time.Duration;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
@@ -41,13 +40,10 @@ public class FichajeServices {
     @Autowired
     private UsuariosRepository usuariosRepository;
 
-
-
     public Fichajes saveFichaje(Fichajes fichaje) {
         return fichajesRepository.save(fichaje);
     }
 
-    @Override
     public Fichajes registrarEntrada(FichajeDTO req) {
         Fichajes abierto = findAbierto(req.getUsuarioId(), LocalDate.parse(req.getFecha()));
         if (abierto != null) {
@@ -57,13 +53,12 @@ public class FichajeServices {
         Fichajes fichaje = new Fichajes();
         fichaje.setUsuarioId(req.getUsuarioId());
         fichaje.setFecha(LocalDate.parse(req.getFecha()));
-        fichaje.setHoraEntrada(LocalDateTime.now());
-        fichaje.setDescansoMinutos(req.getDescansoMinutos());
+        fichaje.setHora_entrada(LocalDateTime.now());
+        fichaje.setDescanso_minutos(req.getDescansoMinutos());
 
-        return saveFichaje(fichaje); // Tu método existente
+        return saveFichaje(fichaje);
     }
 
-    @Override
     public Fichajes registrarSalida(FichajeDTO req) {
         Fichajes abierto = findAbierto(req.getUsuarioId(), LocalDate.parse(req.getFecha()));
 
@@ -72,30 +67,29 @@ public class FichajeServices {
         }
 
         // Calcular automáticamente
-        abierto.setHoraSalida(LocalDateTime.now());
+        abierto.setHora_salida(LocalDateTime.now());
         calcularHorasTrabajadas(abierto);
 
-        return saveFichaje(abierto); // Tu método existente
+        return saveFichaje(abierto);
     }
 
     private Fichajes findAbierto(Integer usuarioId, LocalDate fecha) {
-        // Query personalizada para fichaje abierto
         return fichajesRepository.findByUsuarioIdAndFechaAndHoraSalidaIsNull(usuarioId, fecha);
     }
 
     private void calcularHorasTrabajadas(Fichajes fichaje) {
-        Duration total = Duration.between(fichaje.getHoraEntrada(), fichaje.getHoraSalida());
+        Duration total = Duration.between(fichaje.getHora_entrada(), fichaje.getHora_salida());
 
         BigDecimal horas = BigDecimal.valueOf(total.toMinutes())
                 .divide(BigDecimal.valueOf(60), 2, RoundingMode.HALF_UP);
 
         // Restar descanso
-        if (fichaje.getDescansoMinutos() != null && fichaje.getDescansoMinutos() > 0) {
-            BigDecimal descuento = BigDecimal.valueOf(fichaje.getDescansoMinutos())
-                    .divide(BigDecimal.valueOf(60), 2);
+        if (fichaje.getDescanso_minutos() != null && fichaje.getDescanso_minutos() > 0) {
+            BigDecimal descuento = BigDecimal.valueOf(fichaje.getDescanso_minutos())
+                    .divide(BigDecimal.valueOf(60), 2, RoundingMode.HALF_UP); 
             horas = horas.subtract(descuento);
         }
-
+        //poner horas trabajadas en el fichaje y en la base de datos
         fichaje.setHorasTrabajadas(horas);
     }
 

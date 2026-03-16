@@ -14,12 +14,12 @@ import org.springframework.data.domain.Pageable;
 @Repository
 public interface FichajesRepository extends JpaRepository<Fichajes, Integer> {
 
-    Page<Fichajes> findByUsuarioId(Integer usuarioId, Pageable pageable);
+    Page<Fichajes> findByUsuarioId(int usuarioId, Pageable pageable);
 
     @Query("SELECT f FROM Fichajes f WHERE f.usuarioId = :usuarioId " +
             "AND f.fecha = :fecha AND f.horaSalida IS NULL")
     Fichajes findByUsuarioIdAndFechaAndHoraSalidaIsNull(
-            @Param("usuarioId") Integer usuarioId,
+            @Param("usuarioId") int usuarioId,
             @Param("fecha") LocalDate fecha);
 
 }

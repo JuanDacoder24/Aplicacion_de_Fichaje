@@ -24,11 +24,11 @@ public class Fichajes {
     // Muchos fichajes pueden pertenecer a un usuario
     @ManyToOne
     @JoinColumn(name = "usuario_id")
-    private Usuarios usuario;
+    private int usuarioId;
     private LocalDate fecha;
     private LocalDateTime hora_entrada;
     private LocalDateTime hora_salida;
-    private int descanso_minutos;
+    private Integer descanso_minutos;
     //calcular horas trabajadas a partir de hora_entrada, hora_salida y descanso_minutos
 
     // En Fichajes.java — un fichaje tiene hasta 2 ubicaciones (entrada y salida)
@@ -44,10 +44,10 @@ public class Fichajes {
     public Fichajes() {
     }
 
-    public Fichajes(int id, Usuarios usuario, LocalDate fecha, LocalDateTime hora_entrada, LocalDateTime hora_salida,
+    public Fichajes(int id, int usuarioId, LocalDate fecha, LocalDateTime hora_entrada, LocalDateTime hora_salida,
             int descanso_minutos, String comentario) {
         this.id = id;
-        this.usuario = usuario;
+        this.usuarioId = usuarioId;
         this.fecha = fecha;
         this.hora_entrada = hora_entrada;
         this.hora_salida = hora_salida;
@@ -63,12 +63,12 @@ public class Fichajes {
         this.id = id;
     }
 
-    public Usuarios getUsuario() {
-        return usuario;
+    public int getUsuarioId() {
+        return usuarioId;
     }
 
-    public void setUsuario(Usuarios usuario) {
-        this.usuario = usuario;
+    public void setUsuarioId(int usuarioId) {
+        this.usuarioId = usuarioId;
     }
 
     public LocalDate getFecha() {
