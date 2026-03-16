@@ -12,7 +12,6 @@ import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
-import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
 
 @Entity
@@ -30,15 +29,11 @@ public class Fichajes {
     private LocalDateTime hora_entrada;
     private LocalDateTime hora_salida;
     private int descanso_minutos;
-    private double horas_trabajadas;
+    //calcular horas trabajadas a partir de hora_entrada, hora_salida y descanso_minutos
 
     // En Fichajes.java — un fichaje tiene hasta 2 ubicaciones (entrada y salida)
     @OneToMany(mappedBy = "fichaje", cascade = CascadeType.ALL)
     private List<Ubicacion> ubicacion;
-
-    // Un fichaje tiene muchas pausas
-    @OneToOne(mappedBy = "fichaje", cascade = CascadeType.ALL)
-    private List<Pausas> pausas;
 
     // Un fichaje puede tener muchas solicitudes
     @OneToMany(mappedBy = "fichaje", cascade = CascadeType.ALL)
@@ -50,14 +45,13 @@ public class Fichajes {
     }
 
     public Fichajes(int id, Usuarios usuario, LocalDate fecha, LocalDateTime hora_entrada, LocalDateTime hora_salida,
-            int descanso_minutos, double horas_trabajadas, String comentario) {
+            int descanso_minutos, String comentario) {
         this.id = id;
         this.usuario = usuario;
         this.fecha = fecha;
         this.hora_entrada = hora_entrada;
         this.hora_salida = hora_salida;
         this.descanso_minutos = descanso_minutos;
-        this.horas_trabajadas = horas_trabajadas;
         this.comentario = comentario;
     }
 
@@ -109,28 +103,12 @@ public class Fichajes {
         this.descanso_minutos = descanso_minutos;
     }
 
-    public double getHoras_trabajadas() {
-        return horas_trabajadas;
-    }
-
-    public void setHoras_trabajadas(double horas_trabajadas) {
-        this.horas_trabajadas = horas_trabajadas;
-    }
-
     public List<Ubicacion> getUbicacion() {
         return ubicacion;
     }
 
     public void setUbicacion(List<Ubicacion> ubicacion) {
         this.ubicacion = ubicacion;
-    }
-
-    public List<Pausas> getPausas() {
-        return pausas;
-    }
-
-    public void setPausas(List<Pausas> pausas) {
-        this.pausas = pausas;
     }
 
     public List<Solicitudes> getSolicitudes() {

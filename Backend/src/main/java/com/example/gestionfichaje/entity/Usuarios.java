@@ -4,9 +4,8 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 import jakarta.persistence.CascadeType;
+import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
-import jakarta.persistence.EnumType;
-import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
@@ -25,11 +24,11 @@ public class Usuarios {
     private String email;
     private String password_hash;
 
-    @Enumerated(EnumType.STRING)
-    private Rol rol;
-
-    @Enumerated(EnumType.STRING)
-    private Departamento departamento;
+    @Column(name = "departamento_id")
+    private int departamento; 
+     
+    @Column(name = "rol_id")
+    private int rol;
 
     private LocalDateTime fecha_alta;
     private boolean activo;
@@ -49,7 +48,7 @@ public class Usuarios {
     public Usuarios() {}
 
 
-    public Usuarios(int id, String nombre, String email, String password_hash, Rol rol, Departamento departamento,
+    public Usuarios(int id, String nombre, String email, String password_hash, int rol, int departamento,
             LocalDateTime fecha_alta, boolean activo) {
         this.id = id;
         this.nombre = nombre;
@@ -93,19 +92,19 @@ public class Usuarios {
         this.password_hash = password_hash;
     }
 
-    public Rol getRol() {
+    public int getRol() {
         return rol;
     }
 
-    public void setRol(Rol rol) {
+    public void setRol(int rol) {
         this.rol = rol;
     }
 
-    public Departamento getDepartamento() {
+    public int getDepartamento() {
         return departamento;
     }
 
-    public void setDepartamento(Departamento departamento) {
+    public void setDepartamento(int departamento) {
         this.departamento = departamento;
     }
 

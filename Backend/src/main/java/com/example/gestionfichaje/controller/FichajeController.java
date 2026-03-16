@@ -8,27 +8,17 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
+import com.example.gestionfichaje.dto.FichajeDTO;
 import com.example.gestionfichaje.entity.Fichajes;
 import com.example.gestionfichaje.entity.Horarios;
 import com.example.gestionfichaje.entity.LoginRequest;
 import com.example.gestionfichaje.entity.LoginResponse;
-import com.example.gestionfichaje.entity.Pausas;
 import com.example.gestionfichaje.entity.Solicitudes;
 import com.example.gestionfichaje.entity.Usuarios;
 import com.example.gestionfichaje.security.JwtUtil;
 import com.example.gestionfichaje.services.FichajeServices;
-
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-
 
 @RestController
 @RequestMapping("/api")
@@ -42,26 +32,24 @@ public class FichajeController {
 
     @Autowired
     private UserDetailsService userDetailsService;
-    
 
     @Autowired
     private PasswordEncoder passwordEncoder;
 
     @PostMapping("/auth/login")
     public ResponseEntity<?> login(@RequestBody LoginRequest request) {
-        try{
+        try {
             UserDetails userDetails = userDetailsService.loadUserByUsername(request.getNombre());
             if (passwordEncoder.matches(request.getPassword(), userDetails.getPassword())) {
                 return ResponseEntity.ok(new LoginResponse(jwtUtil.generateToken(userDetails.getUsername())));
             } else {
                 return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Usuario o contraseña incorrectos");
             }
-        }catch (UsernameNotFoundException e) {
+        } catch (UsernameNotFoundException e) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Usuario no encontrado");
         }
     }
 
-    //Obtener todos los usuarios
     @GetMapping("/usuarios")
     public ResponseEntity<?> getAllUsuarios() {
         try {
@@ -71,7 +59,6 @@ public class FichajeController {
         }
     }
 
-    //Obtener usuario por id
     @GetMapping("/usuarios/{id}")
     public ResponseEntity<?> getUsuarioById(@PathVariable Integer id) {
         try {
@@ -81,7 +68,6 @@ public class FichajeController {
         }
     }
 
-    //Registrar un nuevo usuario
     @PostMapping("/usuarios")
     public ResponseEntity<?> createUsuario(@RequestBody Usuarios usuario) {
         try {
@@ -92,7 +78,6 @@ public class FichajeController {
         }
     }
 
-    //Actualizar usuario por id
     @PutMapping("/usuarios/{id}")
     public ResponseEntity<?> updateUsuario(@PathVariable Integer id, @RequestBody Usuarios usuario) {
         try {
@@ -102,19 +87,15 @@ public class FichajeController {
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error al actualizar el usuario");
         }
-    }   
+    }
 
-    //Obtener todos los fichajes con paginacion
-    @GetMapping(value = "/fichajes")
+    @GetMapping("/fichajes")
     public ResponseEntity<Page<Fichajes>> getFichajes(
             @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "100") int size
-    ) {
-
+            @RequestParam(defaultValue = "100") int size) {
         return ResponseEntity.ok(fichajeServices.getAllFichajes(page, size));
     }
 
-    //Obtener fichajes por usuario
     @GetMapping("/fichajes/{usuarioId}")
     public ResponseEntity<?> getFichajesByUsuario(@PathVariable Integer usuarioId,
             @RequestParam(defaultValue = "0") int page,
@@ -122,34 +103,45 @@ public class FichajeController {
         try {
             return ResponseEntity.ok(fichajeServices.getFichajesByUsuario(usuarioId, page, size));
         } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error al obtener los fichajes del usuario");
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body("Error al obtener los fichajes del usuario");
         }
     }
 
-    //Registrar un fichaje
     @PostMapping("/fichajes")
-    public ResponseEntity<?> createFichaje(@RequestBody Fichajes fichaje) {
+    public ResponseEntity<?> createFichaje(@RequestBody FichajeDTO req) {
         try {
-            Fichajes savedFichaje = fichajeServices.saveFichaje(fichaje);
-            return ResponseEntity.ok(savedFichaje);
+            Fichajes resultado;
+
+            if ("ENTRADA".equalsIgnoreCase(req.getTipo())) {
+                resultado = fichajeServices.registrarEntrada(req);
+            } else if ("SALIDA".equalsIgnoreCase(req.getTipo())) {
+                resultado = fichajeServices.registrarSalida(req);
+            } else {
+                return ResponseEntity.badRequest()
+                        .body("Tipo inválido. Use: ENTRADA o SALIDA");
+            }
+
+            return ResponseEntity.ok(resultado);
+
+        } catch (RuntimeException e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
         } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error al crear el fichaje");
+            return ResponseEntity.status(500).body("Error interno del servidor");
         }
     }
 
-    //Actualizar fichaje por id
     @PutMapping("/fichajes/{id}")
     public ResponseEntity<?> updateFichaje(@PathVariable Integer id, @RequestBody Fichajes fichaje) {
         try {
             fichaje.setId(id);
-            Fichajes updatedFichaje = fichajeServices.saveFichaje(fichaje);
+            Fichajes updatedFichaje = fichajeServices.saveFichaje(fichaje); 
             return ResponseEntity.ok(updatedFichaje);
         } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error al actualizar el fichaje");
+            return ResponseEntity.status(500).body("Error al actualizar el fichaje");
         }
     }
 
-    //Eliminar fichaje por id
     @DeleteMapping("/fichajes/{id}")
     public ResponseEntity<?> deleteFichaje(@PathVariable Integer id) {
         try {
@@ -160,7 +152,6 @@ public class FichajeController {
         }
     }
 
-    //Obtener todos los horarios
     @GetMapping("/horarios")
     public ResponseEntity<?> getHorarios() {
         try {
@@ -170,7 +161,6 @@ public class FichajeController {
         }
     }
 
-    //Registrar nuevo horario
     @PostMapping("/horarios")
     public ResponseEntity<?> createHorario(@RequestBody Horarios horario) {
         try {
@@ -181,7 +171,6 @@ public class FichajeController {
         }
     }
 
-    //Actualizar horario por id
     @PutMapping("/horarios/{id}")
     public ResponseEntity<?> updateHorario(@PathVariable Integer id, @RequestBody Horarios horario) {
         try {
@@ -193,7 +182,6 @@ public class FichajeController {
         }
     }
 
-    //Eliminar horario por id del usuario
     @DeleteMapping("/horarios/{usuarioId}")
     public ResponseEntity<?> deleteHorario(@PathVariable Integer usuarioId) {
         try {
@@ -204,59 +192,9 @@ public class FichajeController {
         }
     }
 
-    //CRUD para Pausas
-    @GetMapping("/pausas")
-    public ResponseEntity<?> getAllPausas(@RequestParam(defaultValue = "0") int page, @RequestParam(defaultValue = "100") int size) {
-        try {
-            return ResponseEntity.ok(fichajeServices.getAllPausas(page, size));
-        } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error al obtener las pausas");
-        }
-    }
-
-    @GetMapping("/pausas/{id}")
-    public ResponseEntity<?> getPausaById(@PathVariable Integer id) {
-        try {
-            return ResponseEntity.ok(fichajeServices.getPausaById(id));
-        } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error al obtener la pausa");
-        }
-    }
-
-    @PostMapping("/pausas")
-    public ResponseEntity<?> createPausa(@RequestBody Pausas pausa) {
-        try {
-            Pausas savedPausa = fichajeServices.savePausa(pausa);
-            return ResponseEntity.ok(savedPausa);
-        } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error al crear la pausa");
-        }
-    }
-
-    @PutMapping("/pausas/{id}")
-    public ResponseEntity<?> updatePausa(@PathVariable Integer id, @RequestBody Pausas pausa) {
-        try {
-            pausa.setId(id);
-            Pausas updatedPausa = fichajeServices.savePausa(pausa);
-            return ResponseEntity.ok(updatedPausa);
-        } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error al actualizar la pausa");
-        }
-    }
-
-    @DeleteMapping("/pausas/{id}")
-    public ResponseEntity<?> deletePausa(@PathVariable Integer id) {
-        try {
-            fichajeServices.deletePausa(id);
-            return ResponseEntity.ok("Pausa eliminada correctamente");
-        } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error al eliminar la pausa");
-        }
-    }
-
-    //CRUD para Solicitudes
     @GetMapping("/solicitudes")
-    public ResponseEntity<?> getAllSolicitudes(@RequestParam(defaultValue = "0") int page, @RequestParam(defaultValue = "100") int size) {
+    public ResponseEntity<?> getAllSolicitudes(@RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "100") int size) {
         try {
             return ResponseEntity.ok(fichajeServices.getAllSolicitudes(page, size));
         } catch (Exception e) {
@@ -303,5 +241,4 @@ public class FichajeController {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error al eliminar la solicitud");
         }
     }
-
 }

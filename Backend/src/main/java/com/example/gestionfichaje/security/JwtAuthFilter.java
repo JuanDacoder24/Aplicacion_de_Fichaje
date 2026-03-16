@@ -27,6 +27,13 @@ public class JwtAuthFilter extends OncePerRequestFilter{
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
             throws ServletException, IOException {
 
+        //Permitir el acceso sin autenticacion a la ruta de login
+        String path = request.getServletPath();
+        if(path.equals("/api/auth/login")){
+            filterChain.doFilter(request, response);
+            return;
+        }
+        
         String authHeader = request.getHeader("Authorization");
         String token = null;
         String username = null;

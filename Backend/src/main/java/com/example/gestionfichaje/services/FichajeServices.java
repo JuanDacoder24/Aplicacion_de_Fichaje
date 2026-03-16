@@ -1,15 +1,16 @@
 package com.example.gestionfichaje.services;
 
+import com.example.gestionfichaje.dto.FichajeDTO;
 import com.example.gestionfichaje.entity.Fichajes;
 import com.example.gestionfichaje.entity.Horarios;
-import com.example.gestionfichaje.entity.Pausas;
 import com.example.gestionfichaje.entity.Solicitudes;
 import com.example.gestionfichaje.entity.Usuarios;
 import com.example.gestionfichaje.repository.FichajesRepository;
 import com.example.gestionfichaje.repository.HorariosRepository;
-import com.example.gestionfichaje.repository.PausasRepository;
 import com.example.gestionfichaje.repository.SolicitudesRepository;
 import com.example.gestionfichaje.repository.UsuariosRepository;
+
+import ch.qos.logback.core.util.Duration;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
@@ -17,12 +18,17 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Service;
 
+import java.math.BigDecimal;
+import java.math.RoundingMode;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Optional;
 
 @Service
 public class FichajeServices {
 
-    //Inyeccion de repositorios para poder trabajarlos en el services
+    // Inyeccion de repositorios para poder trabajarlos en el services
     @Autowired
     private FichajesRepository fichajesRepository;
 
@@ -30,32 +36,82 @@ public class FichajeServices {
     private HorariosRepository horariosRepository;
 
     @Autowired
-    private PausasRepository pausasRepository;
-
-    @Autowired
     private SolicitudesRepository solicitudesRepository;
 
     @Autowired
     private UsuariosRepository usuariosRepository;
 
-    //Registrar un fichaje
+
+
     public Fichajes saveFichaje(Fichajes fichaje) {
         return fichajesRepository.save(fichaje);
     }
 
-    //Obtener todos los fichajes con paginacion
+    @Override
+    public Fichajes registrarEntrada(FichajeDTO req) {
+        Fichajes abierto = findAbierto(req.getUsuarioId(), LocalDate.parse(req.getFecha()));
+        if (abierto != null) {
+            throw new RuntimeException("Ya tienes entrada abierta para " + req.getFecha());
+        }
+
+        Fichajes fichaje = new Fichajes();
+        fichaje.setUsuarioId(req.getUsuarioId());
+        fichaje.setFecha(LocalDate.parse(req.getFecha()));
+        fichaje.setHoraEntrada(LocalDateTime.now());
+        fichaje.setDescansoMinutos(req.getDescansoMinutos());
+
+        return saveFichaje(fichaje); // Tu método existente
+    }
+
+    @Override
+    public Fichajes registrarSalida(FichajeDTO req) {
+        Fichajes abierto = findAbierto(req.getUsuarioId(), LocalDate.parse(req.getFecha()));
+
+        if (abierto == null) {
+            throw new RuntimeException("No tienes entrada abierta para cerrar");
+        }
+
+        // Calcular automáticamente
+        abierto.setHoraSalida(LocalDateTime.now());
+        calcularHorasTrabajadas(abierto);
+
+        return saveFichaje(abierto); // Tu método existente
+    }
+
+    private Fichajes findAbierto(Integer usuarioId, LocalDate fecha) {
+        // Query personalizada para fichaje abierto
+        return fichajesRepository.findByUsuarioIdAndFechaAndHoraSalidaIsNull(usuarioId, fecha);
+    }
+
+    private void calcularHorasTrabajadas(Fichajes fichaje) {
+        Duration total = Duration.between(fichaje.getHoraEntrada(), fichaje.getHoraSalida());
+
+        BigDecimal horas = BigDecimal.valueOf(total.toMinutes())
+                .divide(BigDecimal.valueOf(60), 2, RoundingMode.HALF_UP);
+
+        // Restar descanso
+        if (fichaje.getDescansoMinutos() != null && fichaje.getDescansoMinutos() > 0) {
+            BigDecimal descuento = BigDecimal.valueOf(fichaje.getDescansoMinutos())
+                    .divide(BigDecimal.valueOf(60), 2);
+            horas = horas.subtract(descuento);
+        }
+
+        fichaje.setHorasTrabajadas(horas);
+    }
+
+    // Obtener todos los fichajes con paginacion
     public Page<Fichajes> getAllFichajes(int page, int size) {
         Pageable pageable = PageRequest.of(page, size);
         return fichajesRepository.findAll(pageable);
     }
 
-    //Buscar fichajes por usuario
+    // Buscar fichajes por usuario
     public Page<Fichajes> getFichajesByUsuario(Integer usuarioId, int page, int size) {
         Pageable pageable = PageRequest.of(page, size);
         return fichajesRepository.findByUsuarioId(usuarioId, pageable);
     }
 
-    //CRUD para Fichajes
+    // CRUD para Fichajes
     public Fichajes getFichajeById(Integer id) {
         return fichajesRepository.findById(id).orElse(null);
     }
@@ -64,7 +120,7 @@ public class FichajeServices {
         fichajesRepository.deleteById(id);
     }
 
-    //CRUD para Horarios
+    // CRUD para Horarios
     public List<Horarios> getAllHorarios() {
         return horariosRepository.findAll();
     }
@@ -77,30 +133,7 @@ public class FichajeServices {
         horariosRepository.deleteById(id);
     }
 
-    //CRUD para Pausas
-    public List<Pausas> getAllPausas() {
-        return pausasRepository.findAll();
-    }
-
-    public Pausas savePausa(Pausas pausa) {
-        return pausasRepository.save(pausa);
-    }
-
-    public void deletePausa(Integer id) {
-        pausasRepository.deleteById(id);
-    }
-
-    // Paginación para Pausas
-    public List<Pausas> getAllPausas(int page, int size) {
-        Pageable pageable = PageRequest.of(page, size);
-        return pausasRepository.findAll(pageable).getContent();
-    }
-
-    public Pausas getPausaById(Integer id) {
-        return pausasRepository.findById(id).orElse(null);
-    }
-
-    //CRUD para Solicitudes
+    // CRUD para Solicitudes
     public List<Solicitudes> getAllSolicitudes() {
         return solicitudesRepository.findAll();
     }
@@ -123,7 +156,7 @@ public class FichajeServices {
         return solicitudesRepository.findById(id).orElse(null);
     }
 
-    //CRUD para Usuarios
+    // CRUD para Usuarios
     public List<Usuarios> getAllUsuarios() {
         return usuariosRepository.findAll();
     }
