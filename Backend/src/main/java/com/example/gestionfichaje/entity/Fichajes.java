@@ -5,6 +5,7 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 import jakarta.persistence.CascadeType;
+import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -21,37 +22,44 @@ public class Fichajes {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int id;
-    // Muchos fichajes pueden pertenecer a un usuario
+
     @ManyToOne
     @JoinColumn(name = "usuario_id")
-    private int usuarioId;
-    private LocalDate fecha;
-    private LocalDateTime hora_entrada;
-    private LocalDateTime hora_salida;
-    private Integer descanso_minutos;
-    //calcular horas trabajadas a partir de hora_entrada, hora_salida y descanso_minutos
+    private Usuarios usuario;
 
-    // En Fichajes.java — un fichaje tiene hasta 2 ubicaciones (entrada y salida)
+    private LocalDate fecha;
+
+    @Column(name = "hora_entrada")
+    private LocalDateTime horaEntrada;
+
+    @Column(name = "hora_salida")
+    private LocalDateTime horaSalida;
+
+    @Column(name = "descanso_minutos")
+    private Integer descansoMinutos;
+
+    @Column(name = "horas_trabajadas")
+    private int horasTrabajadas;
+
     @OneToMany(mappedBy = "fichaje", cascade = CascadeType.ALL)
     private List<Ubicacion> ubicacion;
 
-    // Un fichaje puede tener muchas solicitudes
     @OneToMany(mappedBy = "fichaje", cascade = CascadeType.ALL)
     private List<Solicitudes> solicitudes;
 
     private String comentario;
-
     public Fichajes() {
     }
 
-    public Fichajes(int id, int usuarioId, LocalDate fecha, LocalDateTime hora_entrada, LocalDateTime hora_salida,
-            int descanso_minutos, String comentario) {
+    public Fichajes(int id, Usuarios usuario, LocalDate fecha, LocalDateTime horaEntrada, LocalDateTime horaSalida,
+            Integer descansoMinutos, int horasTrabajadas, String comentario) {
         this.id = id;
-        this.usuarioId = usuarioId;
+        this.usuario = usuario;
         this.fecha = fecha;
-        this.hora_entrada = hora_entrada;
-        this.hora_salida = hora_salida;
-        this.descanso_minutos = descanso_minutos;
+        this.horaEntrada = horaEntrada;
+        this.horaSalida = horaSalida;
+        this.descansoMinutos = descansoMinutos;
+        this.horasTrabajadas = horasTrabajadas;
         this.comentario = comentario;
     }
 
@@ -63,12 +71,12 @@ public class Fichajes {
         this.id = id;
     }
 
-    public int getUsuarioId() {
-        return usuarioId;
+    public Usuarios getUsuario() {
+        return usuario;
     }
 
-    public void setUsuarioId(int usuarioId) {
-        this.usuarioId = usuarioId;
+    public void setUsuario(Usuarios usuario) {
+        this.usuario = usuario;
     }
 
     public LocalDate getFecha() {
@@ -79,28 +87,28 @@ public class Fichajes {
         this.fecha = fecha;
     }
 
-    public LocalDateTime getHora_entrada() {
-        return hora_entrada;
+    public LocalDateTime getHoraEntrada() {
+        return horaEntrada;
     }
 
-    public void setHora_entrada(LocalDateTime hora_entrada) {
-        this.hora_entrada = hora_entrada;
+    public void setHoraEntrada(LocalDateTime horaEntrada) {
+        this.horaEntrada = horaEntrada;
     }
 
-    public LocalDateTime getHora_salida() {
-        return hora_salida;
+    public LocalDateTime getHoraSalida() {
+        return horaSalida;
     }
 
-    public void setHora_salida(LocalDateTime hora_salida) {
-        this.hora_salida = hora_salida;
+    public void setHoraSalida(LocalDateTime horaSalida) {
+        this.horaSalida = horaSalida;
     }
 
-    public int getDescanso_minutos() {
-        return descanso_minutos;
+    public Integer getDescansoMinutos() {
+        return descansoMinutos;
     }
 
-    public void setDescanso_minutos(int descanso_minutos) {
-        this.descanso_minutos = descanso_minutos;
+    public void setDescansoMinutos(Integer descansoMinutos) {
+        this.descansoMinutos = descansoMinutos;
     }
 
     public List<Ubicacion> getUbicacion() {
@@ -117,6 +125,14 @@ public class Fichajes {
 
     public void setSolicitudes(List<Solicitudes> solicitudes) {
         this.solicitudes = solicitudes;
+    }
+
+    public int getHorasTrabajadas() {
+        return horasTrabajadas;
+    }
+
+    public void setHorasTrabajadas(int horasTrabajadas) {
+        this.horasTrabajadas = horasTrabajadas;
     }
 
     public String getComentario() {

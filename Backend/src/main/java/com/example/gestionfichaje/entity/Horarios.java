@@ -2,6 +2,7 @@ package com.example.gestionfichaje.entity;
 
 import java.time.LocalDateTime;
 
+import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -21,18 +22,24 @@ public class Horarios {
     @ManyToOne
     @JoinColumn(name = "usuario_id")
     private Usuarios usuario;
-    private LocalDateTime hora_inicio;
-    private LocalDateTime hora_fin;
-    private int horas_semanales;
+
+    @Column(name = "hora_inicio")
+    private LocalDateTime horaInicio;
+
+    @Column(name = "hora_fin")
+    private LocalDateTime horaFin;
+
+    @Column(name = "horas_semanales")
+    private int horasSemanales;
 
     public Horarios() {}
 
-    public Horarios(int id, Usuarios usuario, LocalDateTime hora_inicio, LocalDateTime hora_fin, int horas_semanales) {
+    public Horarios(int id, Usuarios usuario, LocalDateTime horaInicio, LocalDateTime horaFin, int horasSemanales) {
         this.id = id;
         this.usuario = usuario;
-        this.hora_inicio = hora_inicio;
-        this.hora_fin = hora_fin;
-        this.horas_semanales = horas_semanales;
+        this.horaInicio = horaInicio;
+        this.horaFin = horaFin;
+        this.horasSemanales = horasSemanales;
     }
 
     public int getId() {
@@ -51,28 +58,28 @@ public class Horarios {
         this.usuario = usuario;
     }
 
-    public LocalDateTime getHora_inicio() {
-        return hora_inicio;
+    public LocalDateTime getHoraInicio() {
+        return horaInicio;
     }
 
-    public void setHora_inicio(LocalDateTime hora_inicio) {
-        this.hora_inicio = hora_inicio;
+    public void setHoraInicio(LocalDateTime horaInicio) {
+        this.horaInicio = horaInicio;
     }
 
-    public LocalDateTime getHora_fin() {
-        return hora_fin;
+    public LocalDateTime getHoraFin() {
+        return horaFin;
     }
 
-    public void setHora_fin(LocalDateTime hora_fin) {
-        this.hora_fin = hora_fin;
+    public void setHoraFin(LocalDateTime horaFin) {
+        this.horaFin = horaFin;
     }
 
-    public int getHoras_semanales() {
-        return horas_semanales;
+    public int getHorasSemanales() {
+        return horasSemanales;
     }
 
-    public void setHoras_semanales(int horas_semanales) {
-        this.horas_semanales = horas_semanales;
+    public void setHorasSemanales(int horasSemanales) {
+        this.horasSemanales = horasSemanales;
     }
 
     

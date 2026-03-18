@@ -18,7 +18,6 @@ public class Ubicacion {
 
     private double latitud;
     private double longitud;
-    private String nombre;
     private String direccion;
 
     @ManyToOne
@@ -28,11 +27,10 @@ public class Ubicacion {
     public Ubicacion() {
     }
 
-    public Ubicacion(int id, double latitud, double longitud, String nombre, String direccion, Fichajes fichaje) {
+    public Ubicacion(int id, double latitud, double longitud, String direccion, Fichajes fichaje) {
         this.id = id;
         this.latitud = latitud;
         this.longitud = longitud;
-        this.nombre = nombre;
         this.direccion = direccion;
         this.fichaje = fichaje;
     }
@@ -59,14 +57,6 @@ public class Ubicacion {
 
     public void setLongitud(double longitud) {
         this.longitud = longitud;
-    }
-
-    public String getNombre() {
-        return nombre;
-    }
-
-    public void setNombre(String nombre) {
-        this.nombre = nombre;
     }
 
     public String getDireccion() {

@@ -7,8 +7,17 @@ public class FichajeDTO {
     private String fecha; 
     private String tipo;
     private int descansoMinutos;
-
     
+    public FichajeDTO() {
+    }
+
+    public FichajeDTO(int id, int usuarioId, String fecha, String tipo, int descansoMinutos) {
+        this.id = id;
+        this.usuarioId = usuarioId;
+        this.fecha = fecha;
+        this.tipo = tipo;
+        this.descansoMinutos = descansoMinutos;
+    }
     public int getId() {
         return id;
     }

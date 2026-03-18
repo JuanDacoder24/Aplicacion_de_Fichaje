@@ -22,41 +22,43 @@ public class Usuarios {
 
     private String nombre;
     private String email;
-    private String password_hash;
 
-    @Column(name = "departamento_id")
-    private int departamento; 
-     
+    @Column(name = "password_hash")
+    private String passwordHash;
+
     @Column(name = "rol_id")
     private int rol;
 
-    private LocalDateTime fecha_alta;
+    @Column(name = "departamento_id")
+    private int departamento;
+
+    @Column(name = "fechaAlta")
+    private LocalDateTime fechaAlta;
+
     private boolean activo;
 
-    // Un usuario tiene muchos fichajes
     @OneToMany(mappedBy = "usuario", cascade = CascadeType.ALL)
     private List<Fichajes> fichajes;
 
-    // Un usuario tiene muchos horarios
     @OneToMany(mappedBy = "usuario", cascade = CascadeType.ALL)
     private List<Horarios> horarios;
 
-    // Un usuario tiene muchas solicitudes
     @OneToMany(mappedBy = "usuario", cascade = CascadeType.ALL)
     private List<Solicitudes> solicitudes;
+
 
     public Usuarios() {}
 
 
-    public Usuarios(int id, String nombre, String email, String password_hash, int rol, int departamento,
-            LocalDateTime fecha_alta, boolean activo) {
+    public Usuarios(int id, String nombre, String email, String passwordHash, int rol, int departamento,
+            LocalDateTime fechaAlta, boolean activo) {
         this.id = id;
         this.nombre = nombre;
         this.email = email;
-        this.password_hash = password_hash;
+        this.passwordHash = passwordHash;
         this.rol = rol;
         this.departamento = departamento;
-        this.fecha_alta = fecha_alta;
+        this.fechaAlta = fechaAlta;
         this.activo = activo;
     }
 
@@ -84,12 +86,12 @@ public class Usuarios {
         this.email = email;
     }
 
-    public String getPassword_hash() {
-        return password_hash;
+    public String getPasswordHash() {
+        return passwordHash;
     }
 
-    public void setPassword_hash(String password_hash) {
-        this.password_hash = password_hash;
+    public void setPasswordHash(String passwordHash) {
+        this.passwordHash = passwordHash;
     }
 
     public int getRol() {
@@ -108,12 +110,12 @@ public class Usuarios {
         this.departamento = departamento;
     }
 
-    public LocalDateTime getFecha_alta() {
-        return fecha_alta;
+    public LocalDateTime getFechaAlta() {
+        return fechaAlta;
     }
 
-    public void setFecha_alta(LocalDateTime fecha_alta) {
-        this.fecha_alta = fecha_alta;
+    public void setFechaAlta(LocalDateTime fechaAlta) {
+        this.fechaAlta = fechaAlta;
     }
 
     public boolean isActivo() {
