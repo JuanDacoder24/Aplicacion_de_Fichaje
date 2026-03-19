@@ -1,0 +1,66 @@
+<body>
+
+    <div class="bg-scene"></div>
+    <div class="orb orb-1"></div>
+    <div class="orb orb-2"></div>
+    <div class="orb orb-3"></div>
+
+    <div class="page">
+        <div class="card-glass">
+
+            <!-- Logo -->
+            <div class="logo">
+                <img src="src/favicon.png" alt="ClockIn Logo" class="logo-img" />
+            </div>
+            <!-- Headline -->
+            <h1 class="headline">
+                Fichaje <span class="accent">preciso</span><br />sin complicaciones
+            </h1>
+            <p class="subline">
+                Controla la jornada laboral de tu equipo en tiempo real.<br />
+                Simple, seguro y desde cualquier dispositivo.
+            </p>
+
+            <!-- Features -->
+            <div class="features">
+                <div class="feature-item">
+                    <div class="feature-text">
+                        <strong>Registro automático</strong>
+                        Entrada y salida con un solo toque
+                    </div>
+                </div>
+                <div class="feature-item">
+                    <div class="feature-text">
+                        <strong>Informes en tiempo real</strong>
+                        Visualiza horas, ausencias y turnos
+                    </div>
+                </div>
+                <div class="feature-item">
+                    <div class="feature-text">
+                        <strong>Datos protegidos</strong>
+                        Cifrado de extremo a extremo
+                    </div>
+                </div>
+            </div>
+
+            <!-- CTA -->
+            <div class="mb-5">
+                <a class="btn btn-indigo btn-lg d-inline-flex align-items-center" [routerLink]="['/login']">
+                    <span>Log in</span>
+                    <svg class="ms-2" width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+                    </svg>
+                </a>
+            </div>
+
+            <div class="badge-wrap">
+                <span class="badge-secure">
+                    <span class="badge-dot"></span>
+                    Sistema activo · Acceso seguro
+                </span>
+            </div>
+
+        </div>
+    </div>
+
+</body>

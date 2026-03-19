@@ -1,0 +1,27 @@
+<nav class="navbar navbar-expand-sm bg-dark navbar-dark py-3" data-bs-theme="dark">
+  <div class="container px-4">
+    <a class="navbar-brand fw-semibold" href="#" aria-label="Brand">ClockIn</a>
+
+    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#mainNavbar"
+      aria-controls="mainNavbar" aria-expanded="false" aria-label="Toggle navigation">
+      <span class="navbar-toggler-icon"></span>
+    </button>
+
+    <div class="collapse navbar-collapse" id="mainNavbar">
+      <ul class="navbar-nav ms-auto gap-sm-3">
+        <li class="nav-item">
+          <a class="nav-link active " [routerLink]="['/home']" aria-current="page">Inicio</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" [routerLink]="['/dashboard/form']" aria-current="page">Nuevo Producto</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" [routerLink]="['/dashboard/productList']">Productos</a>
+        </li>
+        <li class="nav-item">
+          <button class="btn btn-dark me-2" (click)="logout()" [routerLink]="['/home']">Log Out</button>
+        </li>
+      </ul>
+    </div>
+  </div>
+</nav>
