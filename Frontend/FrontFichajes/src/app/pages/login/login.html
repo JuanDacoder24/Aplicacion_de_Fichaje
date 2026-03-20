@@ -1,1 +1,127 @@
-<p>login works!</p>
+<div class="min-vh-100 d-flex align-items-center justify-content-center position-relative overflow-hidden px-3" 
+     style="background: linear-gradient(135deg, #0d2a4a 0%);">
+
+    <div class="card-glass">
+
+        <!-- Header con logo -->
+        <div class="text-center mb-4">
+            <h2 class="fw-bold mb-2" style="color: #ffffff; font-size: 1.75rem; letter-spacing: -0.5px;">
+                Iniciar Sesión
+            </h2>
+            <p class="mb-0" style="color: #2ecc71; font-size: 0.95rem;">
+                Accede a tu cuenta de torneos
+            </p>
+        </div>
+
+        <!-- Formulario principal -->
+        <div class="container">
+            
+            <form #loginForm="ngForm" (ngSubmit)="getUser()">
+
+                <!-- Campo Usuario -->
+                <div class="mb-4">
+                    <label for="username" class="form-label fw-semibold mb-2" style="color: #c7d5e0; font-size: 0.9rem; text-transform: uppercase; letter-spacing: 0.5px;">
+                        Usuario
+                    </label>
+                    <div class="position-relative">
+                        <span class="position-absolute top-50 start-0 translate-middle-y ms-3" style="color: #27ae60;">
+                            <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round"
+                                    d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                            </svg>
+                        </span>
+                        <input 
+                            type="text" 
+                            id="username" 
+                            name="username" 
+                            placeholder="Ingresa tu nombre de usuario"
+                            class="form-control form-control-lg ps-5"
+                            style="background-color: #ffffff; border: 2px solid #2a475e; color: #c7d5e0; 
+                                   padding: 0.875rem 1rem 0.875rem 3rem; transition: all 0.3s ease;"
+                            ngModel
+                            required
+                            onfocus="this.style.borderColor='#66c0f4'; this.style.boxShadow='0 0 0 0.2rem rgba(102, 192, 244, 0.25)'"
+                            onblur="this.style.borderColor='#2a475e'; this.style.boxShadow='none'"
+                        />
+                    </div>
+                </div>
+
+                <!-- Campo Contraseña -->
+                <div class="mb-4">
+                    <div class="d-flex justify-content-between align-items-center mb-2">
+                        <label for="password" class="form-label fw-semibold mb-0" style="color: #c7d5e0; font-size: 0.9rem; text-transform: uppercase; letter-spacing: 0.5px;">
+                            Contraseña
+                        </label>
+                        <a href="#" class="text-decoration-none" style="color: #27ae60; font-size: 0.85rem;">
+                            ¿Olvidaste tu contraseña?
+                        </a>
+                    </div>
+                    <div class="position-relative">
+                        <span class="position-absolute top-50 start-0 translate-middle-y ms-3" style="color: #27ae60;">
+                            <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round"
+                                    d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+                            </svg>
+                        </span>
+                        <input 
+                            type="password" 
+                            id="password" 
+                            name="password" 
+                            placeholder="Ingresa tu contraseña"
+                            class="form-control form-control-lg ps-5"
+                            style="background-color: #ffffff; border: 2px solid #2a475e; color: #c7d5e0;
+                                   padding: 0.875rem 1rem 0.875rem 3rem; transition: all 0.3s ease;"
+                            ngModel
+                            required
+                            onfocus="this.style.borderColor='#66c0f4'; this.style.boxShadow='0 0 0 0.2rem rgba(102, 192, 244, 0.25)'"
+                            onblur="this.style.borderColor='#2a475e'; this.style.boxShadow='none'"
+                        />
+                    </div>
+                </div>
+
+                <!-- Recordarme -->
+                <div class="form-check mb-4">
+                    <input class="form-check-input" type="checkbox" id="rememberMe" name="rememberMe"
+                           style="background-color: #0e1419; border-color: #2a475e;">
+                    <label class="form-check-label" for="rememberMe" style="color: #8f98a0; font-size: 0.9rem;">
+                        Mantener sesión iniciada
+                    </label>
+                </div>
+
+                <!-- Botón de inicio de sesión -->
+                <button 
+                    type="submit" 
+                    class="btn btn-lg w-100 mb-3 fw-semibold position-relative overflow-hidden"
+                    style="background: linear-gradient(100deg, #0d2a4a 20%, #27ae60 100%); 
+                           border: none; color: white; padding: 0.875rem; 
+                           box-shadow: 0 8px 32px rgba(39,174,96,0.35);
+                           transition: all 0.3s ease;"
+                    onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 6px 24px rgba(39,174,96,0.6)'"
+                    onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 4px 16px rgba(39,174,96,0.4)'">
+                    <span class="d-flex align-items-center justify-content-center gap-2">
+                        <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" 
+                                  d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h7a3 3 0 013 3v1" />
+                        </svg>
+                        INICIAR SESIÓN
+                    </span>
+                </button>
+
+                <!-- Botón volver -->
+                <button 
+                    type="button" 
+                    class="btn btn-lg w-100 fw-semibold" 
+                    style="background-color: transparent; border: 2px solid #2a475e; 
+                           color: #c7d5e0; padding: 0.875rem; transition: all 0.3s ease;"
+                    [routerLink]="['/landingPage']"
+                    onmouseover="this.style.backgroundColor='#2a475e'; this.style.borderColor='#27ae60'"
+                    onmouseout="this.style.backgroundColor='transparent'; this.style.borderColor='#2a475e'">
+                    Volver al inicio
+                </button>
+
+            </form>
+
+            
+
+    </div>
+</div>
