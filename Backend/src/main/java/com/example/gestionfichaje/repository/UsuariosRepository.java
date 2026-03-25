@@ -7,4 +7,6 @@ import com.example.gestionfichaje.entity.Usuarios;
 @Repository
 public interface UsuariosRepository extends JpaRepository<Usuarios, Integer> {
 
+    Usuarios findByNombre(String nombre);
+
 }

@@ -16,11 +16,11 @@
         <!-- Formulario principal -->
         <div class="container">
             
-            <form #loginForm="ngForm" (ngSubmit)="getUser()">
+            <form #loginForm="ngForm" (ngSubmit)="getUser(loginForm)">
 
                 <!-- Campo Usuario -->
                 <div class="mb-4">
-                    <label for="username" class="form-label fw-semibold mb-2" style="color: #c7d5e0; font-size: 0.9rem; text-transform: uppercase; letter-spacing: 0.5px;">
+                    <label for="nombre" class="form-label fw-semibold mb-2" style="color: #c7d5e0; font-size: 0.9rem; text-transform: uppercase; letter-spacing: 0.5px;">
                         Usuario
                     </label>
                     <div class="position-relative">
@@ -32,8 +32,8 @@
                         </span>
                         <input 
                             type="text" 
-                            id="username" 
-                            name="username" 
+                            id="nombre" 
+                            name="nombre" 
                             placeholder="Ingresa tu nombre de usuario"
                             class="form-control form-control-lg ps-5"
                             style="background-color: #ffffff; border: 2px solid #2a475e; color: #c7d5e0; 

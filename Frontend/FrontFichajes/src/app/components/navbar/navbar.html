@@ -1,25 +1,35 @@
-<nav class="navbar navbar-expand-sm bg-dark navbar-dark py-3" data-bs-theme="dark">
+<nav class="navbar navbar-expand-sm navbar-dark py-3 navbar-flotante" style="background: linear-gradient(160deg, #071a2e 0%, #0d2a4a 100%); border-bottom: 1px solid rgba(46,134,193,0.15);">
   <div class="container px-4">
-    <a class="navbar-brand fw-semibold" href="#" aria-label="Brand">ClockIn</a>
 
-    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#mainNavbar"
+    <!-- Logo -->
+    <a class="navbar-brand" [routerLink]="['/pageInicio']">
+      <img src="assets/images/favicon.png" alt="ClockIn Logo"
+           class="img-fluid"
+           style="width: 8vw; min-width: 50px; max-width: 100px;" />
+    </a>
+
+    <button class="navbar-toggler border-0" type="button" data-bs-toggle="collapse" data-bs-target="#mainNavbar"
       aria-controls="mainNavbar" aria-expanded="false" aria-label="Toggle navigation">
       <span class="navbar-toggler-icon"></span>
     </button>
 
     <div class="collapse navbar-collapse" id="mainNavbar">
-      <ul class="navbar-nav ms-auto gap-sm-3">
+      <ul class="navbar-nav ms-auto gap-sm-2 align-items-center">
         <li class="nav-item">
-          <a class="nav-link active " [routerLink]="['/home']" aria-current="page">Inicio</a>
+          <a class="nav-link" [routerLink]="['/pageInicio']" routerLinkActive="nav-link-active">Inicio</a>
         </li>
         <li class="nav-item">
-          <a class="nav-link" [routerLink]="['/dashboard/form']" aria-current="page">Nuevo Producto</a>
+          <a class="nav-link" [routerLink]="['/dashboard/pageSolicitudes']" routerLinkActive="nav-link-active">Solicitudes</a>
         </li>
         <li class="nav-item">
-          <a class="nav-link" [routerLink]="['/dashboard/productList']">Productos</a>
+          <a class="nav-link" [routerLink]="['/dashboard/pageDocumentos']" routerLinkActive="nav-link-active">Documentos</a>
         </li>
         <li class="nav-item">
-          <button class="btn btn-dark me-2" (click)="logout()" [routerLink]="['/home']">Log Out</button>
+          <a class="nav-link" [routerLink]="['/dashboard/pageAnuncios']" routerLinkActive="nav-link-active">Anuncios</a>
+        </li>
+        <li class="nav-item ms-sm-2">
+          <li class="nav-item">
+                <button class="btn-clockin-sm" (click)="logout()">Log Out</button>
         </li>
       </ul>
     </div>

@@ -16,27 +16,27 @@ import com.example.gestionfichaje.repository.UsuariosRepository;
 import java.util.Collections;
 
 @Service
-public class UserService implements UserDetailsService{
+public class UserService implements UserDetailsService {
 
     @Autowired
     private UsuariosRepository usuariosRepository;
 
-    @Bean
-    public PasswordEncoder passwordEncoder() {
-        return new BCryptPasswordEncoder();
-    }
+    @Autowired
+    private PasswordEncoder passwordEncoder;
 
     @Override
-    public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-        Usuarios usuario = usuariosRepository.findAll().stream()
-            .filter(u -> u.getNombre().equals(username) && u.isActivo())
-            .findFirst()
-            .orElseThrow(() -> new UsernameNotFoundException("Usuario no encontrado: " + username));
+    public UserDetails loadUserByUsername(String nombre) throws UsernameNotFoundException {
+
+        Usuarios usuario = usuariosRepository.findByNombre(nombre);
+
+        if (usuario == null || !usuario.isActivo()) {
+            throw new UsernameNotFoundException("Usuario no encontrado: " + nombre);
+        }
 
         return new User(
-            usuario.getNombre(),
-            usuario.getPasswordHash(),
-            Collections.singletonList(new SimpleGrantedAuthority("ROLE_" + usuario.getRol()))
-        );
+                usuario.getNombre(),
+                usuario.getPasswordHash(),
+                Collections.singletonList(
+                        new SimpleGrantedAuthority("ROLE_" + usuario.getRol())));
     }
 }

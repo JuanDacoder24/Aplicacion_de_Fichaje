@@ -1,4 +1,3 @@
-
 <div class="min-vh-100 d-flex align-items-center justify-content-center px-3">
   <div class="orb orb-1"></div>
   <div class="orb orb-2"></div>
@@ -11,13 +10,25 @@
       Página no <span class="accent">encontrada</span>
     </h1>
     <p class="error-sub mb-5">
-      Parece que esta página no ha fichado hoy.<br/>
+      Parece que esta página no ha fichado hoy.<br />
       Puede que la URL sea incorrecta o ya no exista.
     </p>
 
-    <a [routerLink]="['/landingPage']" class="btn-back">
-      <span> ← Volver al inicio</span>
-    </a>
+    <button type="submit" [routerLink]="['/landingPage']"
+      class="btn btn-lg w-100 mb-3 fw-semibold position-relative overflow-hidden" style="background: linear-gradient(100deg, #0d2a4a 20%, #27ae60 100%); 
+                           border: none; color: white; padding: 0.875rem; 
+                           box-shadow: 0 8px 32px rgba(39,174,96,0.35);
+                           transition: all 0.3s ease;"
+      onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 6px 24px rgba(39,174,96,0.6)'"
+      onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 4px 16px rgba(39,174,96,0.4)'">
+      <span class="d-flex align-items-center justify-content-center gap-2">
+        <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round"
+            d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h7a3 3 0 013 3v1" />
+        </svg>
+        Volver
+      </span>
+    </button>
 
   </div>
 </div>

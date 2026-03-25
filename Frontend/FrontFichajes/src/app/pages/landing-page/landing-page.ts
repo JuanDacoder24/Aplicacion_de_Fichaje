@@ -8,5 +8,17 @@ import { RouterLink } from '@angular/router';
   styleUrl: './landing-page.css',
 })
 export class LandingPage {
+  
+  isToken: boolean;
+
+  constructor() {
+    this.isToken = false;
+  }
+
+  ngOnInit(): void {
+    if (localStorage.getItem('token')) {
+      this.isToken = true;
+    }
+  }
 
 }

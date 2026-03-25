@@ -1,0 +1,33 @@
+.footer-title {
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: #e8f4f8;
+  margin-bottom: 16px;
+  background: linear-gradient(90deg, #2e86c1, #2ecc71);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.footer-link {
+  color: #a8c8d8;
+  text-decoration: none;
+  transition: color 0.2s;
+}
+.footer-link:hover {
+  color: #2ecc71;
+}
+
+.badge-dot {
+  width: 8px;
+  height: 8px;
+  background: #2ecc71;
+  border-radius: 50%;
+  display: inline-block;
+  animation: blink 2s ease-in-out infinite;
+  flex-shrink: 0;
+}
+@keyframes blink {
+  0%, 100% { opacity: 1; }
+  50%       { opacity: 0.3; }
+}

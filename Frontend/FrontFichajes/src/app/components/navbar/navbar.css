@@ -1,0 +1,58 @@
+:host {
+  padding-top: 90px;
+}
+.nav-link {
+  color: #a8c8d8 !important;
+  font-weight: 500;
+  transition: color 0.2s;
+  position: relative;
+}
+
+.nav-link:hover {
+  color: #2ecc71 !important;
+}
+
+.nav-link-active {
+  color: #fff !important;
+}
+
+.nav-link-active::after {
+  content: '';
+  position: absolute;
+  bottom: -2px;
+  left: 0; right: 0;
+  height: 2px;
+  background: linear-gradient(90deg, #0d2a4a, #2ecc71);
+  border-radius: 2px;
+}
+
+.btn-clockin-sm {
+  padding: 8px 20px;
+  font-size: 0.9rem;
+  font-weight: 700;
+  color: #fff;
+  background: linear-gradient(90deg, #0d2a4a, #2ecc71);
+  border: none;
+  border-radius: 10px;
+  cursor: pointer;
+  transition: transform 0.2s, box-shadow 0.2s;
+  box-shadow: 0 4px 16px rgba(39,174,96,0.3);
+}
+
+.btn-clockin-sm:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px rgba(39,174,96,0.5);
+}
+
+.navbar-flotante {
+  position: fixed;
+  top: 16px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 90%;
+  max-width: 960px;
+  border-radius: 16px;
+  border: 1px solid rgba(46, 134, 193, 0.2);
+  box-shadow: 0 4px 16px rgba(39,174,96,0.3);
+  z-index: 1000;
+}

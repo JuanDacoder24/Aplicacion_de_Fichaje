@@ -39,8 +39,24 @@
             </div>
         </div>
 
-        <!-- CTA -->
-        <button type="submit" class="btn btn-lg w-100 mb-3 fw-semibold position-relative overflow-hidden" style="background: linear-gradient(100deg, #0d2a4a 20%, #27ae60 100%); 
+        @if(isToken){
+            <button type="submit" class="btn btn-lg w-100 mb-3 fw-semibold position-relative overflow-hidden" style="background: linear-gradient(100deg, #0d2a4a 20%, #27ae60 100%); 
+                           border: none; color: white; padding: 0.875rem; 
+                           box-shadow: 0 8px 32px rgba(39,174,96,0.35);
+                           transition: all 0.3s ease;"
+            onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 6px 24px rgba(39,174,96,0.6)'"
+            onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 4px 16px rgba(39,174,96,0.4)'" [routerLink]="['/login']">
+            <span class="d-flex align-items-center justify-content-center gap-2">
+
+                Página principal
+                <svg class="ms-2" width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+                </svg>
+            </span>
+        </button>
+
+        }@else {
+            <button type="submit" class="btn btn-lg w-100 mb-3 fw-semibold position-relative overflow-hidden" style="background: linear-gradient(100deg, #0d2a4a 20%, #27ae60 100%); 
                            border: none; color: white; padding: 0.875rem; 
                            box-shadow: 0 8px 32px rgba(39,174,96,0.35);
                            transition: all 0.3s ease;"
@@ -54,6 +70,9 @@
                 </svg>
             </span>
         </button>
+        }
+
+        
 
         <div class="badge-wrap">
             <span class="badge-secure">
