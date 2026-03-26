@@ -56,3 +56,11 @@
   box-shadow: 0 4px 16px rgba(39,174,96,0.3);
   z-index: 1000;
 }
+
+.form-select-sm{
+  font-size: 0.9rem;
+  font-weight: 700;
+  background:  #0d2a4a;
+  border-color: #0d2a4a;
+  color: #a8c8d8 !important;
+}

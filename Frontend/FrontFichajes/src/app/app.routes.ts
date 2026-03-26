@@ -9,6 +9,8 @@ import { PageInicio } from './pages/page-inicio/page-inicio';
 import { PageSolicitudes } from './pages/page-solicitudes/page-solicitudes';
 import { PageDocumentos } from './pages/page-documentos/page-documentos';
 import { PageAnuncios } from './pages/page-anuncios/page-anuncios';
+import { PageRegister } from './pages/page-register/page-register';
+import { roleGuard } from './guard/rol-guard';
 
 export const routes: Routes = [
     {path: '', pathMatch: 'full', redirectTo: 'landingPage'},
@@ -22,7 +24,8 @@ export const routes: Routes = [
             {path: 'pageInicio', component: PageInicio},
             {path: 'pageSolicitudes', component: PageSolicitudes},
             {path: 'pageDocumentos', component: PageDocumentos},
-            {path: 'pageAnuncios', component: PageAnuncios}
+            {path: 'pageAnuncios', component: PageAnuncios},
+            {path: 'pageRegister', component: PageRegister, canActivate: [roleGuard, authGuard], data: {rol: 'ADMIN'}}
         ]
     },
     {path: 'error404', component: Error404},

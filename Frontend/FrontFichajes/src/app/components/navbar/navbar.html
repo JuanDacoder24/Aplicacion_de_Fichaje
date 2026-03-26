@@ -1,11 +1,11 @@
-<nav class="navbar navbar-expand-sm navbar-dark py-3 navbar-flotante" style="background: linear-gradient(160deg, #071a2e 0%, #0d2a4a 100%); border-bottom: 1px solid rgba(46,134,193,0.15);">
+<nav class="navbar navbar-expand-sm navbar-dark py-3 navbar-flotante"
+  style="background: linear-gradient(160deg, #071a2e 0%, #0d2a4a 100%); border-bottom: 1px solid rgba(46,134,193,0.15);">
   <div class="container px-4">
 
     <!-- Logo -->
-    <a class="navbar-brand" [routerLink]="['/pageInicio']">
-      <img src="assets/images/favicon.png" alt="ClockIn Logo"
-           class="img-fluid"
-           style="width: 8vw; min-width: 50px; max-width: 100px;" />
+    <a class="navbar-brand" [routerLink]="['/landingPage']">
+      <img src="assets/images/favicon.png" alt="ClockIn Logo" class="img-fluid"
+        style="width: 8vw; min-width: 50px; max-width: 100px;" />
     </a>
 
     <button class="navbar-toggler border-0" type="button" data-bs-toggle="collapse" data-bs-target="#mainNavbar"
@@ -16,7 +16,7 @@
     <div class="collapse navbar-collapse" id="mainNavbar">
       <ul class="navbar-nav ms-auto gap-sm-2 align-items-center">
         <li class="nav-item">
-          <a class="nav-link" [routerLink]="['/pageInicio']" routerLinkActive="nav-link-active">Inicio</a>
+          <a class="nav-link" [routerLink]="['/dashboard/pageInicio']" routerLinkActive="nav-link-active">Inicio</a>
         </li>
         <li class="nav-item">
           <a class="nav-link" [routerLink]="['/dashboard/pageSolicitudes']" routerLinkActive="nav-link-active">Solicitudes</a>
@@ -27,9 +27,22 @@
         <li class="nav-item">
           <a class="nav-link" [routerLink]="['/dashboard/pageAnuncios']" routerLinkActive="nav-link-active">Anuncios</a>
         </li>
+
+        @if (authService.isAdmin()) {
+        <li class="nav-item">
+          <a class="nav-link" [routerLink]="['/dashboard/pageRegister']" routerLinkActive="nav-link-active">Registro</a>
+        </li>
+        }
+
+        <li class="nav-item dropdown">
+          <select class="form-select form-select-sm" (change)="cambiarRol($event)" [value]="rolActual">
+            <option value="empleado">Empleado</option>
+            <option value="admin">Admin</option>
+          </select>
+        </li>
+
         <li class="nav-item ms-sm-2">
-          <li class="nav-item">
-                <button class="btn-clockin-sm" (click)="logout()">Log Out</button>
+          <button class="btn-clockin-sm" (click)="logout()">Log Out</button>
         </li>
       </ul>
     </div>

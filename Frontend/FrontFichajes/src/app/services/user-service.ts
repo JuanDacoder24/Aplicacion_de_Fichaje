@@ -2,6 +2,7 @@ import { HttpClient } from '@angular/common/http';
 import { inject, Injectable } from '@angular/core';
 import { IUser } from '../interface/iuser';
 import { firstValueFrom } from 'rxjs';
+import { IUsuario } from '../interface/iusuario';
 
 @Injectable({
   providedIn: 'root',
@@ -9,9 +10,15 @@ import { firstValueFrom } from 'rxjs';
 export class UserService {
 
   private httpClient = inject(HttpClient)
-  private baseUrl = 'http://localhost:8080/api/auth/login'
+  private baseUrl = 'http://localhost:8080/api'
 
-  login(user: IUser): Promise<any>{
-    return firstValueFrom(this.httpClient.post<any>(this.baseUrl, user))
+  async login(user: IUser): Promise<any>{
+    const res= await firstValueFrom(this.httpClient.post<any>(`${this.baseUrl}/auth/login`, user))
+    return res
+  }
+
+  async register(usuario: IUsuario): Promise<any>{
+    const res= await firstValueFrom(this.httpClient.post<any>(`${this.baseUrl}/auth/register`, usuario))
+    return res
   }
 }

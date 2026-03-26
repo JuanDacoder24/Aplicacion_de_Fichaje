@@ -1,10 +1,11 @@
 package com.example.gestionfichaje.controller;
 
+import java.util.Map;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -14,10 +15,10 @@ import com.example.gestionfichaje.dto.FichajeDTO;
 import com.example.gestionfichaje.entity.Fichajes;
 import com.example.gestionfichaje.entity.Horarios;
 import com.example.gestionfichaje.entity.LoginRequest;
-import com.example.gestionfichaje.entity.LoginResponse;
 import com.example.gestionfichaje.entity.Solicitudes;
 import com.example.gestionfichaje.entity.Usuarios;
 import com.example.gestionfichaje.security.JwtUtil;
+import com.example.gestionfichaje.security.UserDetailsImpl;
 import com.example.gestionfichaje.services.FichajeServices;
 
 @RestController
@@ -37,18 +38,27 @@ public class FichajeController {
     private PasswordEncoder passwordEncoder;
 
     @PostMapping("/auth/login")
-    public ResponseEntity<?> login(@RequestBody LoginRequest request) {
-        try {
-            UserDetails userDetails = userDetailsService.loadUserByUsername(request.getNombre());
-            if (passwordEncoder.matches(request.getPassword(), userDetails.getPassword())) {
-                return ResponseEntity.ok(new LoginResponse(jwtUtil.generateToken(userDetails.getUsername())));
-            } else {
-                return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Usuario o contraseña incorrectos");
-            }
-        } catch (UsernameNotFoundException e) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Usuario no encontrado");
+public ResponseEntity<?> login(@RequestBody LoginRequest request) {
+    try {
+        UserDetailsImpl userDetails = (UserDetailsImpl) userDetailsService.loadUserByUsername(request.getNombre());
+
+        if (passwordEncoder.matches(request.getPassword(), userDetails.getPassword())) {
+            String token = jwtUtil.generateToken(userDetails.getUsername(), userDetails.getRol());
+
+            return ResponseEntity.ok(Map.of(
+                "token",  token,
+                "id",     userDetails.getId(),
+                "nombre", userDetails.getUsername(),
+                "rol",    userDetails.getRol()   // "ADMIN" o "EMPLEADO"
+            ));
+        } else {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Usuario o contraseña incorrectos");
         }
+
+    } catch (UsernameNotFoundException e) {
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Usuario no encontrado");
     }
+}
 
     @GetMapping("/usuarios")
     public ResponseEntity<?> getAllUsuarios() {

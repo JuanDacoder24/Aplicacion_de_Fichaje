@@ -1,14 +1,13 @@
 package com.example.gestionfichaje.security;
 
 import java.security.Key;
-import java.util.Date; // Cambiado de java.sql.Date a java.util.Date
+import java.util.Date;
 
 import org.springframework.stereotype.Component;
 
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.security.Keys;
-
 
 @Component
 public class JwtUtil {
@@ -19,11 +18,13 @@ public class JwtUtil {
         return Keys.hmacShaKeyFor(SECRET_KEY.getBytes());
     }
 
-    public String generateToken(String username) {
+    // ← Ahora recibe también el rol
+    public String generateToken(String username, String rol) {
         return Jwts.builder()
                 .setSubject(username)
+                .claim("rol", rol)  // ← "ADMIN" o "EMPLEADO" viaja en el token
                 .setIssuedAt(new Date())
-                .setExpiration(new Date(System.currentTimeMillis() + 1000 * 60 * 60 * 10)) // 10 horas
+                .setExpiration(new Date(System.currentTimeMillis() + 1000 * 60 * 60 * 10))
                 .signWith(getSigningKey(), SignatureAlgorithm.HS256)
                 .compact();
     }
@@ -35,6 +36,16 @@ public class JwtUtil {
                 .parseClaimsJws(token)
                 .getBody()
                 .getSubject();
+    }
+
+    // ← Nuevo método para extraer el rol del token
+    public String extractRol(String token) {
+        return Jwts.parser()
+                .setSigningKey(getSigningKey())
+                .build()
+                .parseClaimsJws(token)
+                .getBody()
+                .get("rol", String.class);
     }
 
     public boolean isTokenValid(String token, String username) {
