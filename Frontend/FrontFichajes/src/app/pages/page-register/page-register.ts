@@ -1,4 +1,4 @@
-import { UserService } from './../../services/user-service';
+import { AuthService } from './../../services/auth-service';
 import { Component, inject } from '@angular/core';
 import { AbstractControl, FormControl, FormGroup, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
@@ -12,7 +12,7 @@ import { IUsuario } from '../../interface/iusuario';
 })
 export class PageRegister {
 
-  private userService = inject(UserService)
+  private authService = inject(AuthService)
   private router = inject(Router)
 
   registerForm: FormGroup
@@ -71,7 +71,7 @@ export class PageRegister {
     }
 
     try {
-      const response = await this.userService.register(usuario)
+      const response = await this.authService.register(usuario)
       console.log('Respuesta:', response)
       this.resetForm()
 

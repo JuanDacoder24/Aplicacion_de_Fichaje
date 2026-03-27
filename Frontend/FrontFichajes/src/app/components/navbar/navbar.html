@@ -18,26 +18,26 @@
         <li class="nav-item">
           <a class="nav-link" [routerLink]="['/dashboard/pageInicio']" routerLinkActive="nav-link-active">Inicio</a>
         </li>
+
         <li class="nav-item">
-          <a class="nav-link" [routerLink]="['/dashboard/pageSolicitudes']" routerLinkActive="nav-link-active">Solicitudes</a>
+          <a class="nav-link" [routerLink]="['/dashboard/pageDocumentos']"
+            routerLinkActive="nav-link-active">Documentos</a>
         </li>
-        <li class="nav-item">
-          <a class="nav-link" [routerLink]="['/dashboard/pageDocumentos']" routerLinkActive="nav-link-active">Documentos</a>
-        </li>
+
         <li class="nav-item">
           <a class="nav-link" [routerLink]="['/dashboard/pageAnuncios']" routerLinkActive="nav-link-active">Anuncios</a>
         </li>
 
-        @if (authService.isAdmin()) {
+        @if (esAdmin) {
         <li class="nav-item">
-          <a class="nav-link" [routerLink]="['/dashboard/pageRegister']" routerLinkActive="nav-link-active">Registro</a>
+          <a class="nav-link" [routerLink]="['/dashboard/pageRegister']" routerLinkActive="nav-link-active">Registrar</a>
         </li>
         }
 
         <li class="nav-item dropdown">
-          <select class="form-select form-select-sm" (change)="cambiarRol($event)" [value]="rolActual">
-            <option value="empleado">Empleado</option>
-            <option value="admin">Admin</option>
+          <select class="form-select-sm" (change)="cambiarRol($event)" [value]="rolActual">
+            <option value="empleado">👤 Empleado</option>
+            <option value="admin">👑 Admin</option>
           </select>
         </li>
 

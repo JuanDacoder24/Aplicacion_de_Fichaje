@@ -1,9 +1,9 @@
 import { Component, inject } from '@angular/core';
 import { FormsModule, NgForm } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
-import { UserService } from '../../services/user-service';
 import { IUser } from '../../interface/iuser';
 import Swal from 'sweetalert2';
+import { AuthService } from '../../services/auth-service';
 
 @Component({
   selector: 'app-login',
@@ -13,7 +13,7 @@ import Swal from 'sweetalert2';
 })
 export class Login {
 
-  private userService = inject(UserService)
+  private authService = inject(AuthService)
   private router = inject(Router)
 
   ngOnInit(): void {
@@ -22,11 +22,10 @@ export class Login {
     }
   }
 
-
   async getUser(loginForm: NgForm) {
     const loginUser: IUser = loginForm.value as IUser
     try {
-      let res = await this.userService.login(loginUser)
+      let res = await this.authService.login(loginUser)
       console.log(res)
 
       if (res.token) {

@@ -49,7 +49,7 @@ public ResponseEntity<?> login(@RequestBody LoginRequest request) {
                 "token",  token,
                 "id",     userDetails.getId(),
                 "nombre", userDetails.getUsername(),
-                "rol",    userDetails.getRol()   // "ADMIN" o "EMPLEADO"
+                "rol",    userDetails.getRol()  
             ));
         } else {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Usuario o contraseña incorrectos");

@@ -25,7 +25,7 @@ export const routes: Routes = [
             {path: 'pageSolicitudes', component: PageSolicitudes},
             {path: 'pageDocumentos', component: PageDocumentos},
             {path: 'pageAnuncios', component: PageAnuncios},
-            {path: 'pageRegister', component: PageRegister, canActivate: [roleGuard, authGuard], data: {rol: 'ADMIN'}}
+            {path: 'pageRegister', component: PageRegister, canActivate: [roleGuard], data: {rol: 'admin'}}
         ]
     },
     {path: 'error404', component: Error404},
