@@ -1,12 +1,13 @@
 import { AuthService } from './../../services/auth-service';
 import { Component, inject } from '@angular/core';
-import { AbstractControl, FormControl, FormGroup, Validators } from '@angular/forms';
+import { AbstractControl, FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
 import { IUsuario } from '../../interface/iusuario';
+import { CommonModule } from '@angular/common';
 
 @Component({
   selector: 'app-page-register',
-  imports: [],
+  imports: [CommonModule, ReactiveFormsModule],
   templateUrl: './page-register.html',
   styleUrl: './page-register.css',
 })
@@ -69,8 +70,6 @@ export class PageRegister {
       fechaAlta: Date.now(),
       activo: this.registerForm.get('activo')?.value
     }
-
-    try {
       const response = await this.authService.register(usuario)
       console.log('Respuesta:', response)
       this.resetForm()
@@ -78,10 +77,12 @@ export class PageRegister {
       setTimeout(() => {
         this.router.navigate(['/dashboard/pageDocumentos'])
       }, 2000)
+  }
 
-    } catch (error: any) {
-      console.error('Error:', error)
-    }
+  usuarios: IUsuario[] = [];
+
+  getDepartamento(id: number): string {
+    return this.departamento.find(d => d.id === id)?.nombre || '-';
   }
 
   // Resetear formulario

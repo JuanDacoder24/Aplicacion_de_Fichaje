@@ -10,7 +10,7 @@ import { IUsuario } from '../interface/iusuario';
 export class AuthService {
 
   private httpClient = inject(HttpClient)
-  private baseUrl = 'http://localhost:8080/api'
+  private baseUrl = 'http://localhost:8080/api/auth'
 
   private rolSignal = signal<string>('')
   private tokenSignal = signal<string>('')
@@ -32,7 +32,7 @@ export class AuthService {
 
   async login(user: IUser): Promise<any> {
     const res = await firstValueFrom(
-      this.httpClient.post<any>(`${this.baseUrl}/auth/login`, user)
+      this.httpClient.post<any>(`${this.baseUrl}/login`, user)
     )
 
     if (res.token && res.rol) {
@@ -45,7 +45,7 @@ export class AuthService {
 
   async register(usuario: IUsuario): Promise<any> {
     const res = await firstValueFrom(
-      this.httpClient.post<any>(`${this.baseUrl}/auth/register`, usuario)
+      this.httpClient.post<any>(`${this.baseUrl}/register`, usuario)
     )
     return res
 
