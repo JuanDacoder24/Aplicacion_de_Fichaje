@@ -1,5 +1,5 @@
 import { AuthService } from './../../services/auth-service';
-import { Component, inject } from '@angular/core';
+import { Component, inject, signal, OnInit } from '@angular/core';
 import { AbstractControl, FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
 import { IUsuario } from '../../interface/iusuario';
@@ -11,75 +11,86 @@ import { CommonModule } from '@angular/common';
   templateUrl: './page-register.html',
   styleUrl: './page-register.css',
 })
-export class PageRegister {
+export class PageRegister implements OnInit {
+  private authService = inject(AuthService);
+  private router = inject(Router);
 
-  private authService = inject(AuthService)
-  private router = inject(Router)
+  // Signals para estado reactivo
+  public registerForm = signal<FormGroup>(new FormGroup({
+    id: new FormControl(-1),
+    nombre: new FormControl(null, [Validators.required, Validators.minLength(3), Validators.maxLength(100)]),
+    email: new FormControl(null, [Validators.required, Validators.pattern(/^[\w-.]+@([\w-]+\.)+[\w-]{2,4}$/)]),
+    passwordHash: new FormControl(null, [Validators.required, Validators.minLength(6)]),
+    repitePassword: new FormControl(null, [Validators.required, Validators.minLength(6)]),
+    rol: new FormControl(null, [Validators.required, Validators.min(1), Validators.max(2)]),
+    departamento: new FormControl(null, [Validators.required, Validators.min(1), Validators.max(7)]),
+    fechaAlta: new FormControl(Date.now()),
+    activo: new FormControl(true)
+  }, [this.passValidator]));
 
-  registerForm: FormGroup
-  private nextId: number
-  isCargando: boolean = false
+  public usuarios = signal<IUsuario[]>([]);
+  public isCargando = signal<boolean>(false);
+  public nextId = signal<number>(1);
 
-  rol = [
+  // Datos estáticos (también podrían ser signals si cambian dinámicamente)
+  public rol = [
     { id: 1, nombre: 'Admin' },
     { id: 2, nombre: 'Empleado' }
-  ]
+  ];
 
-  departamento = [
+  public departamento = [
     { id: 1, nombre: 'RRHH' },
     { id: 2, nombre: 'IT' },
     { id: 3, nombre: 'VENTAS' },
     { id: 4, nombre: 'MARKETING' }
-  ]
-
-  constructor() {
-    this.nextId = 1
-    this.registerForm = new FormGroup({
-      id: new FormControl(-1),
-      nombre: new FormControl(null, [Validators.required, Validators.minLength(3), Validators.maxLength(100)]),
-      email: new FormControl(null, [Validators.required, Validators.pattern(/^[\w-.]+@([\w-]+\.)+[\w-]{2,4}$/)]),
-      passwordHash: new FormControl(null, [Validators.required, Validators.minLength(6)]),
-      repitePassword: new FormControl(null, [Validators.required, Validators.minLength(6)]),
-      rol: new FormControl(null, [Validators.required, Validators.min(1), Validators.max(2)]),
-      departamento: new FormControl(null, [Validators.required, Validators.min(1), Validators.max(7)]),
-      fechaAlta: new FormControl(Date.now()),
-      activo: new FormControl(true)
-    }, [this.passValidator])
-  }
+  ];
 
   ngOnInit(): void {
-
+    this.cargarUsuarios();
   }
 
-  // Metodo para obtener los datos del formulario
+  // Método para obtener los datos del formulario
   async getDataForm() {
-    if (this.registerForm.invalid) {
-      Object.keys(this.registerForm.controls).forEach(key => {
-        this.registerForm.get(key)?.markAsTouched()
-      })
-      return
+    const form = this.registerForm();
+    
+    if (form.invalid) {
+      Object.keys(form.controls).forEach(key => {
+        form.get(key)?.markAsTouched();
+      });
+      return;
     }
+
+    this.isCargando.set(true);
 
     const usuario: IUsuario = {
-      id: 0, 
-      nombre: this.registerForm.get('nombre')?.value,
-      email: this.registerForm.get('email')?.value,
-      passwordHash: this.registerForm.get('passwordHash')?.value,
-      rol: parseInt(this.registerForm.get('rol')?.value),
-      departamento: parseInt(this.registerForm.get('departamento')?.value),
+      id: this.nextId(),
+      nombre: form.get('nombre')?.value,
+      email: form.get('email')?.value,
+      passwordHash: form.get('passwordHash')?.value,
+      rol: parseInt(form.get('rol')?.value),
+      departamento: parseInt(form.get('departamento')?.value),
       fechaAlta: Date.now(),
-      activo: this.registerForm.get('activo')?.value
-    }
-      const response = await this.authService.register(usuario)
-      console.log('Respuesta:', response)
-      this.resetForm()
+      activo: form.get('activo')?.value
+    };
+
+    try {
+      const response = await this.authService.register(usuario);
+      console.log('Respuesta:', response);
+      
+      // Actualizar señales
+      this.usuarios.update(prev => [...prev, usuario]);
+      this.nextId.update(id => id + 1);
+      this.resetForm();
 
       setTimeout(() => {
-        this.router.navigate(['/dashboard/pageDocumentos'])
-      }, 2000)
+        this.router.navigate(['/dashboard/pageDocumentos']);
+      }, 2000);
+    } catch (error) {
+      console.error('Error al registrar:', error);
+    } finally {
+      this.isCargando.set(false);
+    }
   }
-
-  usuarios: IUsuario[] = [];
 
   getDepartamento(id: number): string {
     return this.departamento.find(d => d.id === id)?.nombre || '-';
@@ -87,7 +98,8 @@ export class PageRegister {
 
   // Resetear formulario
   resetForm() {
-    this.registerForm.reset({
+    const form = this.registerForm();
+    form.reset({
       id: -1,
       nombre: null,
       email: null,
@@ -97,28 +109,31 @@ export class PageRegister {
       departamento: null,
       fechaAlta: Date.now(),
       activo: true
-    })
+    });
 
     // Marcar todos los campos como no tocados
-    Object.keys(this.registerForm.controls).forEach(key => {
-      const control = this.registerForm.get(key)
-      control?.markAsUntouched()
-    })
+    Object.keys(form.controls).forEach(key => {
+      const control = form.get(key);
+      control?.markAsUntouched();
+    });
   }
 
   // Validador personalizado para verificar que las contraseñas coincidan
   passValidator(formValue: AbstractControl): any {
-    const password = formValue.get('passwordHash')?.value
-    const repitePassword = formValue.get('repitePassword')?.value
-
-    return (password !== repitePassword) ? { 'passwordnotmatches': true } : null
+    const password = formValue.get('passwordHash')?.value;
+    const repitePassword = formValue.get('repitePassword')?.value;
+    return (password !== repitePassword) ? { 'passwordnotmatches': true } : null;
   }
 
-  // Metodo para verificar errores en controles especificos
+  // Método para verificar errores en controles específicos
   checkControl(formControlName: string, validator: string): boolean | undefined {
-    return this.registerForm.get(formControlName)?.hasError(validator) &&
-      this.registerForm.get(formControlName)?.touched
+    const control = this.registerForm().get(formControlName);
+    return control?.hasError(validator) && control?.touched;
   }
 
-
+  // Cargar usuarios existentes (ejemplo)
+  private cargarUsuarios() {
+    // Aquí cargarías usuarios desde un servicio si es necesario
+    // this.usuarios.set(usuariosExistentes);
+  }
 }

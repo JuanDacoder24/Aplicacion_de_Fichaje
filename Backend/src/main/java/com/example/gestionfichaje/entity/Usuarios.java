@@ -36,7 +36,7 @@ public class Usuarios {
     @Column(name = "departamento_id")
     private int departamento;
 
-    @Column(name = "fechaAlta")
+    @Column(name = "fecha_alta")
     private LocalDateTime fechaAlta;
 
     private boolean activo;

@@ -1,127 +1,121 @@
-<div class="register-wrapper">
-  <div class="register-row">
+<div style="background: linear-gradient(160deg, #071a2e 0%, #0d2a4a 50%, #071a2e 100%); min-height: 100vh; padding: 2.5rem 1.5rem;">
+  <div class="layout">
 
     <!-- FORMULARIO -->
     <div class="col-form">
-      <p class="section-title">Registrar usuario</p>
-      <div class="card-dark">
-        <form [formGroup]="registerForm" (ngSubmit)="getDataForm()">
+      <p class="section-label">Gestión de usuarios</p>
+      <div class="card-glass">
+        <p class="card-title">Nuevo <span class="accent">Usuario</span></p>
+        <p class="card-sub">Completa los datos para registrar un acceso</p>
 
-          <div class="mb-3">
+        <form [formGroup]="registerForm()" (ngSubmit)="getDataForm()">
+
+          <div class="field">
             <label>Nombre</label>
-            <input 
-              formControlName="nombre" 
-              type="text" 
-              class="form-control custom-input" 
-              placeholder="Nombre de usuario"
-              [class.is-invalid]="checkControl('nombre', 'required') || checkControl('nombre', 'minlength')">
-            @if (checkControl('nombre', 'required')) {
-              <div class="invalid-feedback">El nombre es obligatorio</div>
+            <input formControlName="nombre" type="text" placeholder="Nombre de usuario"
+              [class.invalid]="checkControl('nombre','required') || checkControl('nombre','minlength')">
+            @if (checkControl('nombre','required')) {
+              <div class="err">El nombre es obligatorio</div>
             }
-            @if (checkControl('nombre', 'minlength')) {
-              <div class="invalid-feedback">Mínimo 3 caracteres</div>
+            @if (checkControl('nombre','minlength')) {
+              <div class="err">Mínimo 3 caracteres</div>
             }
           </div>
 
-          <div class="mb-3">
+          <div class="field">
             <label>Email</label>
-            <input 
-              formControlName="email" 
-              type="email" 
-              class="form-control custom-input" 
-              placeholder="correo@empresa.com"
-              [class.is-invalid]="checkControl('email', 'required') || checkControl('email', 'pattern')">
-            @if (checkControl('email', 'required')) {
-              <div class="invalid-feedback">El email es obligatorio</div>
+            <input formControlName="email" type="email" placeholder="correo@empresa.com"
+              [class.invalid]="checkControl('email','required') || checkControl('email','pattern')">
+            @if (checkControl('email','required')) {
+              <div class="err">El email es obligatorio</div>
             }
-            @if (checkControl('email', 'pattern')) {
-              <div class="invalid-feedback">Email no válido</div>
+            @if (checkControl('email','pattern')) {
+              <div class="err">Email no válido</div>
             }
           </div>
 
-          <div class="mb-3 grid-2">
+          <div class="grid-2">
             <div>
               <label>Contraseña</label>
-              <input 
-                formControlName="passwordHash" 
-                type="password" 
-                class="form-control custom-input" 
-                placeholder="••••••"
-                [class.is-invalid]="checkControl('passwordHash', 'minlength')">
-              @if (checkControl('passwordHash', 'minlength')) {
-                <div class="invalid-feedback">Mínimo 6 caracteres</div>
+              <input formControlName="passwordHash" type="password" placeholder="••••••"
+                [class.invalid]="checkControl('passwordHash','required') || checkControl('passwordHash','minlength')">
+              @if (checkControl('passwordHash','required')) {
+                <div class="err">La contraseña es obligatoria</div>
+              }
+              @if (checkControl('passwordHash','minlength')) {
+                <div class="err">Mínimo 6 caracteres</div>
               }
             </div>
             <div>
-              <label>Repetir contraseña</label>
-              <input 
-                formControlName="repitePassword" 
-                type="password" 
-                class="form-control custom-input" 
-                placeholder="••••••"
-                [class.is-invalid]="registerForm.hasError('passwordnotmatches') && registerForm.get('repitePassword')?.touched">
-              @if (registerForm.hasError('passwordnotmatches') && registerForm.get('repitePassword')?.touched) {
-                <div class="invalid-feedback">Las contraseñas no coinciden</div>
+              <label>Repetir</label>
+              <input formControlName="repitePassword" type="password" placeholder="••••••"
+                [class.invalid]="registerForm().hasError('passwordnotmatches') && registerForm().get('repitePassword')?.touched">
+              @if (registerForm().hasError('passwordnotmatches') && registerForm().get('repitePassword')?.touched) {
+                <div class="err">No coinciden</div>
               }
             </div>
           </div>
 
-          <div class="mb-3 grid-2">
+          <div class="grid-2">
             <div>
               <label>Rol</label>
-              <select 
-                formControlName="rol" 
-                class="form-select custom-input"
-                [class.is-invalid]="checkControl('rol', 'required')">
+              <select formControlName="rol" [class.invalid]="checkControl('rol','required')">
                 <option value="">Seleccionar...</option>
                 @for (r of rol; track r.id) {
                   <option [value]="r.id">{{ r.nombre }}</option>
                 }
               </select>
-              @if (checkControl('rol', 'required')) {
-                <div class="invalid-feedback">El rol es obligatorio</div>
+              @if (checkControl('rol','required')) {
+                <div class="err">El rol es obligatorio</div>
               }
             </div>
             <div>
               <label>Departamento</label>
-              <select 
-                formControlName="departamento" 
-                class="form-select custom-input"
-                [class.is-invalid]="checkControl('departamento', 'required')">
+              <select formControlName="departamento" [class.invalid]="checkControl('departamento','required')">
                 <option value="">Seleccionar...</option>
                 @for (d of departamento; track d.id) {
                   <option [value]="d.id">{{ d.nombre }}</option>
                 }
               </select>
-              @if (checkControl('departamento', 'required')) {
-                <div class="invalid-feedback">El departamento es obligatorio</div>
+              @if (checkControl('departamento','required')) {
+                <div class="err">El departamento es obligatorio</div>
               }
             </div>
           </div>
 
-          <div class="mb-3">
-            <label class="check-label">
-              <input formControlName="activo" type="checkbox">
-              <span>Usuario activo</span>
-            </label>
+          <div class="check-row">
+            <input formControlName="activo" type="checkbox">
+            <span>Usuario activo</span>
           </div>
 
-          <div class="grid-2 mt-4">
+          <hr class="divider">
+
+          <div class="btn-row">
             <button type="button" class="btn-reset" (click)="resetForm()">Limpiar</button>
-            <button type="submit" class="btn-clockin-sm" [disabled]="isCargando">
-              {{ isCargando ? 'Registrando...' : 'Registrar' }}
+            <button type="submit" class="btn-clockin" [disabled]="isCargando()">
+              {{ isCargando() ? 'Registrando...' : 'Registrar' }} →
             </button>
           </div>
 
         </form>
+
+        <div class="badge-wrap">
+          <span class="badge-secure">
+            <span class="badge-dot"></span>
+            Acceso seguro · JWT + BCrypt
+          </span>
+        </div>
       </div>
     </div>
 
     <!-- TABLA -->
     <div class="col-table">
-      <p class="section-title">Usuarios registrados</p>
-      <div class="card-dark table-card">
-        <table class="tabla-usuarios">
+      <p class="section-label">
+        Usuarios registrados
+        <span class="counter">{{ usuarios().length }}</span>
+      </p>
+      <div class="table-card">
+        <table class="tabla">
           <thead>
             <tr>
               <th>Nombre</th>
@@ -132,28 +126,29 @@
             </tr>
           </thead>
           <tbody>
-            @if (usuarios.length === 0) {
+            @if (usuarios().length === 0) {
               <tr>
-                <td colspan="5" class="empty-state">No hay usuarios registrados aún</td>
+                <td colspan="5">
+                  <div class="empty-state">No hay usuarios registrados aún</div>
+                </td>
               </tr>
-            } @else {
-              @for (u of usuarios; track u.email) {
-                <tr>
-                  <td class="td-nombre">{{ u.nombre }}</td>
-                  <td class="td-email">{{ u.email }}</td>
-                  <td>
-                    <span [class]="u.rol === 1 ? 'badge-admin' : 'badge-empleado'">
-                      {{ u.rol === 1 ? 'ADMIN' : 'EMPLEADO' }}
-                    </span>
-                  </td>
-                  <td>{{ getDepartamento(u.departamento) }}</td>
-                  <td>
-                    <span [class]="u.activo ? 'badge-activo' : 'badge-inactivo'">
-                      {{ u.activo ? 'Activo' : 'Inactivo' }}
-                    </span>
-                  </td>
-                </tr>
-              }
+            }
+            @for (u of usuarios(); track u.id) {
+              <tr>
+                <td class="td-nombre">{{ u.nombre }}</td>
+                <td class="td-email">{{ u.email }}</td>
+                <td>
+                  <span [class]="u.rol === 1 ? 'badge-admin' : 'badge-empleado'">
+                    {{ u.rol === 1 ? 'ADMIN' : 'EMPLEADO' }}
+                  </span>
+                </td>
+                <td>{{ getDepartamento(u.departamento) }}</td>
+                <td>
+                  <span [class]="u.activo ? 'badge-activo' : 'badge-inactivo'">
+                    {{ u.activo ? 'Activo' : 'Inactivo' }}
+                  </span>
+                </td>
+              </tr>
             }
           </tbody>
         </table>
