@@ -34,7 +34,8 @@ public class UserDetailsImpl implements UserDetails {
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
-        // Añadimos ROLE_ para que Spring Security entienda hasRole ADMIN
+        System.out.println("Rol leído desde BD: [" + rol + "]");
+        System.out.println("Authority generada: [ROLE_" + rol + "]");
         return List.of(new SimpleGrantedAuthority("ROLE_" + rol));
     }
 

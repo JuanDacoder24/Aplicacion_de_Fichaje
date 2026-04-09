@@ -1,7 +1,6 @@
 <div style="background: linear-gradient(160deg, #071a2e 0%, #0d2a4a 50%, #071a2e 100%); min-height: 100vh; padding: 2.5rem 1.5rem;">
   <div class="layout">
 
-    <!-- FORMULARIO -->
     <div class="col-form">
       <p class="section-label">Gestión de usuarios</p>
       <div class="card-glass">
@@ -60,9 +59,8 @@
             <div>
               <label>Rol</label>
               <select formControlName="rol" [class.invalid]="checkControl('rol','required')">
-                <option value="">Seleccionar...</option>
                 @for (r of rol; track r.id) {
-                  <option [value]="r.id">{{ r.nombre }}</option>
+                  <option [ngValue]="r.id">{{ r.nombre }}</option>
                 }
               </select>
               @if (checkControl('rol','required')) {
@@ -72,9 +70,8 @@
             <div>
               <label>Departamento</label>
               <select formControlName="departamento" [class.invalid]="checkControl('departamento','required')">
-                <option value="">Seleccionar...</option>
                 @for (d of departamento; track d.id) {
-                  <option [value]="d.id">{{ d.nombre }}</option>
+                  <option [ngValue]="d.id">{{ d.nombre }}</option>
                 }
               </select>
               @if (checkControl('departamento','required')) {
@@ -82,12 +79,6 @@
               }
             </div>
           </div>
-
-          <div class="check-row">
-            <input formControlName="activo" type="checkbox">
-            <span>Usuario activo</span>
-          </div>
-
           <hr class="divider">
 
           <div class="btn-row">
@@ -98,62 +89,7 @@
           </div>
 
         </form>
-
-        <div class="badge-wrap">
-          <span class="badge-secure">
-            <span class="badge-dot"></span>
-            Acceso seguro · JWT + BCrypt
-          </span>
-        </div>
       </div>
     </div>
-
-    <!-- TABLA -->
-    <div class="col-table">
-      <p class="section-label">
-        Usuarios registrados
-        <span class="counter">{{ usuarios().length }}</span>
-      </p>
-      <div class="table-card">
-        <table class="tabla">
-          <thead>
-            <tr>
-              <th>Nombre</th>
-              <th>Email</th>
-              <th>Rol</th>
-              <th>Dpto</th>
-              <th>Estado</th>
-            </tr>
-          </thead>
-          <tbody>
-            @if (usuarios().length === 0) {
-              <tr>
-                <td colspan="5">
-                  <div class="empty-state">No hay usuarios registrados aún</div>
-                </td>
-              </tr>
-            }
-            @for (u of usuarios(); track u.id) {
-              <tr>
-                <td class="td-nombre">{{ u.nombre }}</td>
-                <td class="td-email">{{ u.email }}</td>
-                <td>
-                  <span [class]="u.rol === 1 ? 'badge-admin' : 'badge-empleado'">
-                    {{ u.rol === 1 ? 'ADMIN' : 'EMPLEADO' }}
-                  </span>
-                </td>
-                <td>{{ getDepartamento(u.departamento) }}</td>
-                <td>
-                  <span [class]="u.activo ? 'badge-activo' : 'badge-inactivo'">
-                    {{ u.activo ? 'Activo' : 'Inactivo' }}
-                  </span>
-                </td>
-              </tr>
-            }
-          </tbody>
-        </table>
-      </div>
-    </div>
-
   </div>
 </div>

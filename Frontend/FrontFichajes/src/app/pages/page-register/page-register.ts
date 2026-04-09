@@ -12,6 +12,7 @@ import { CommonModule } from '@angular/common';
   styleUrl: './page-register.css',
 })
 export class PageRegister implements OnInit {
+  
   private authService = inject(AuthService);
   private router = inject(Router);
 

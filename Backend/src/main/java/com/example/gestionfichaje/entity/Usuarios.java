@@ -62,7 +62,7 @@ public class Usuarios {
         this.passwordHash = passwordHash;
         this.rol = rol;
         this.departamento = departamento;
-        this.fechaAlta = fechaAlta;
+        this.fechaAlta = fechaAlta.now();
         this.activo = activo;
     }
 

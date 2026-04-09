@@ -1,0 +1,49 @@
+<div class="container mt-5">
+
+
+    <div class="col-table ">
+      <p class="section-label ">
+        Usuarios registrados
+        <span class="counter">{{ usuarios().length }}</span>
+      </p>
+      <div class="table-card">
+        <table class="tabla">
+          <thead>
+            <tr>
+              <th>Nombre</th>
+              <th>Email</th>
+              <th>Rol</th>
+              <th>Dpto</th>
+              <th>Estado</th>
+            </tr>
+          </thead>
+          <tbody>
+            @if (usuarios().length === 0) {
+              <tr>
+                <td colspan="5">
+                  <div class="empty-state">No hay usuarios registrados aún</div>
+                </td>
+              </tr>
+            }
+            @for (u of usuarios(); track u.id) {
+              <tr>
+                <td class="td-nombre">{{ u.nombre }}</td>
+                <td class="td-email">{{ u.email }}</td>
+                <td>
+                  <span [class]="u.rol === 1 ? 'badge-admin' : 'badge-empleado'">
+                    {{ u.rol === 1 ? 'ADMIN' : 'EMPLEADO' }}
+                  </span>
+                </td>
+                <td>{{ getDepartamento(u.departamento) }}</td>
+                <td>
+                  <span [class]="u.activo ? 'badge-activo' : 'badge-inactivo'">
+                    {{ u.activo ? 'Activo' : 'Inactivo' }}
+                  </span>
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    </div>
+    </div>

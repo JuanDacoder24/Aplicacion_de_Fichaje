@@ -1,25 +1,29 @@
 package com.example.gestionfichaje.entity;
 
-import jakarta.persistence.*;
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonProperty;
+
+import jakarta.persistence.Entity;
+import jakarta.persistence.Id;
 
 @Entity
-@Table(name = "rol")
 public class Rol {
-
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private int id;
+    private Integer id;
+    private String nombre;
 
-    private String nombre; // admin o empleado
-
-    public Rol() {
+    @JsonCreator
+    public Rol(@JsonProperty("id") Integer id) {
+        this.id = id;
     }
 
-    public int getId() {
+    public Rol() {}
+
+    public Integer getId() {
         return id;
     }
 
-    public void setId(int id) {
+    public void setId(Integer id) {
         this.id = id;
     }
 
@@ -29,5 +33,7 @@ public class Rol {
 
     public void setNombre(String nombre) {
         this.nombre = nombre;
-    }
+    } 
+
+    
 }

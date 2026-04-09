@@ -11,6 +11,7 @@ import { PageDocumentos } from './pages/page-documentos/page-documentos';
 import { PageAnuncios } from './pages/page-anuncios/page-anuncios';
 import { PageRegister } from './pages/page-register/page-register';
 import { roleGuard } from './guard/rol-guard';
+import { PageUsuarios } from './pages/page-usuarios/page-usuarios';
 
 export const routes: Routes = [
     {path: '', pathMatch: 'full', redirectTo: 'landingPage'},
@@ -25,6 +26,7 @@ export const routes: Routes = [
             {path: 'pageSolicitudes', component: PageSolicitudes},
             {path: 'pageDocumentos', component: PageDocumentos},
             {path: 'pageAnuncios', component: PageAnuncios},
+            {path: 'pageUsuarios', component: PageUsuarios},
             {path: 'pageRegister', component: PageRegister, canActivate: [roleGuard], data: {rol: 'admin'}}
         ]
     },

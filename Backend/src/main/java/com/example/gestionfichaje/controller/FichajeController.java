@@ -1,5 +1,6 @@
 package com.example.gestionfichaje.controller;
 
+import java.time.LocalDateTime;
 import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -20,11 +21,14 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.example.gestionfichaje.dto.FichajeDTO;
+import com.example.gestionfichaje.dto.RegisterUserRequest;
 import com.example.gestionfichaje.entity.Fichajes;
 import com.example.gestionfichaje.entity.Horarios;
 import com.example.gestionfichaje.entity.LoginRequest;
+import com.example.gestionfichaje.entity.Rol;
 import com.example.gestionfichaje.entity.Solicitudes;
 import com.example.gestionfichaje.entity.Usuarios;
+import com.example.gestionfichaje.repository.RolRepository;
 import com.example.gestionfichaje.security.JwtUtil;
 import com.example.gestionfichaje.security.UserDetailsImpl;
 import com.example.gestionfichaje.services.FichajeServices;
@@ -46,38 +50,35 @@ public class FichajeController {
     private PasswordEncoder passwordEncoder;
 
     @PostMapping("/auth/login")
-public ResponseEntity<?> login(@RequestBody LoginRequest request) {
-    try {
-        UserDetailsImpl userDetails = (UserDetailsImpl) userDetailsService.loadUserByUsername(request.getNombre());
+    public ResponseEntity<?> login(@RequestBody LoginRequest request) {
+        try {
+            UserDetailsImpl userDetails = (UserDetailsImpl) userDetailsService.loadUserByUsername(request.getNombre());
 
-        if (passwordEncoder.matches(request.getPassword(), userDetails.getPassword())) {
-            String token = jwtUtil.generateToken(userDetails.getUsername(), userDetails.getRol());
+            if (passwordEncoder.matches(request.getPassword(), userDetails.getPassword())) {
+                String token = jwtUtil.generateToken(userDetails.getUsername(), userDetails.getRol());
 
-            return ResponseEntity.ok(Map.of(
-                "token",  token,
-                "id",     userDetails.getId(),
-                "nombre", userDetails.getUsername(),
-                "rol",    userDetails.getRol()  
-            ));
-        } else {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Usuario o contraseña incorrectos");
+                return ResponseEntity.ok(Map.of(
+                        "token", token,
+                        "id", userDetails.getId(),
+                        "nombre", userDetails.getUsername(),
+                        "rol", userDetails.getRol()));
+            } else {
+                return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Usuario o contraseña incorrectos");
+            }
+
+        } catch (UsernameNotFoundException e) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Usuario no encontrado");
         }
-
-    } catch (UsernameNotFoundException e) {
-        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Usuario no encontrado");
     }
-}
 
-@PostMapping("/auth/register")
-public ResponseEntity<?> register(@RequestBody Usuarios usuario) {
-    try {
-        // Encriptar la contraseña antes de guardar
-        usuario.setPasswordHash(passwordEncoder.encode(usuario.getPasswordHash()));
-        Usuarios savedUsuario = fichajeServices.saveUsuario(usuario);
-        return ResponseEntity.ok(savedUsuario);
-    } catch (Exception e) {
-        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error al registrar el usuario");
-    }
+    @Autowired
+    private RolRepository rolRepository;
+
+    @PostMapping("/auth/register")
+public ResponseEntity<?> register(@RequestBody Map<String, Object> body) {
+    System.out.println("ENTRO A REGISTER");
+    System.out.println(body);
+    return ResponseEntity.ok(body);
 }
 
     @GetMapping("/usuarios")
@@ -165,7 +166,7 @@ public ResponseEntity<?> register(@RequestBody Usuarios usuario) {
     public ResponseEntity<?> updateFichaje(@PathVariable Integer id, @RequestBody Fichajes fichaje) {
         try {
             fichaje.setId(id);
-            Fichajes updatedFichaje = fichajeServices.saveFichaje(fichaje); 
+            Fichajes updatedFichaje = fichajeServices.saveFichaje(fichaje);
             return ResponseEntity.ok(updatedFichaje);
         } catch (Exception e) {
             return ResponseEntity.status(500).body("Error al actualizar el fichaje");
