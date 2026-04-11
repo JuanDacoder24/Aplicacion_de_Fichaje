@@ -34,15 +34,14 @@ public class SecurityConfig {
                 .cors(withDefaults())
                 .csrf(csrf -> csrf.disable())
                 .authorizeHttpRequests(auth -> auth
-                    .requestMatchers(org.springframework.http.HttpMethod.OPTIONS, "/**").permitAll()
-                        .requestMatchers("/publico/**").permitAll()
-                        .requestMatchers("/api/auth/login").permitAll()
-                        .requestMatchers("/api/auth/register").hasRole("ADMIN")
-                        .requestMatchers("/api/usuarios").hasRole("ADMIN")
-                        .requestMatchers("/api/usuarios/**").hasRole("ADMIN")
-                        .requestMatchers("/admin/**").hasRole("ADMIN")
-                        .anyRequest().authenticated()
-
+                .requestMatchers(org.springframework.http.HttpMethod.OPTIONS, "/**").permitAll()
+                .requestMatchers("/publico/**").permitAll()
+                .requestMatchers("/api/auth/login").permitAll()
+                .requestMatchers("/api/auth/register").permitAll()
+                .requestMatchers("/api/usuarios").hasRole("ADMIN")
+                .requestMatchers("/api/usuarios/**").hasRole("ADMIN")
+                .requestMatchers("/admin/**").hasRole("ADMIN")
+                .anyRequest().authenticated()
                 )
                 .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class);
 

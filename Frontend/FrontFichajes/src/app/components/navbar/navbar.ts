@@ -1,10 +1,11 @@
 import { Component, effect, inject } from '@angular/core';
 import { Router, RouterLink } from '@angular/router';
 import { AuthService } from '../../services/auth-service';
+import { CommonModule } from '@angular/common';
 
 @Component({
   selector: 'app-navbar',
-  imports: [RouterLink],
+  imports: [RouterLink, CommonModule],
   templateUrl: './navbar.html',
   styleUrl: './navbar.css',
 })
@@ -28,16 +29,17 @@ export class Navbar {
   }
 
   cambiarRol(event: any) {
-    const nuevoRol = event.target.value
-    const oldRol = this.rolActual
-    this.authService.cambiarRol(nuevoRol)
-    
-    if (oldRol === 'admin' && nuevoRol === 'empleado') {
-      if (this.router.url.includes('pageRegister')) {
-        this.router.navigate(['/dashboard/pageInicio'])
-      }
+  if (!this.esAdmin) return; 
+  const nuevoRol = event.target.value
+  const oldRol = this.rolActual
+  this.authService.cambiarRol(nuevoRol)
+  
+  if (oldRol === 'admin' && nuevoRol === 'empleado') {
+    if (this.router.url.includes('pageRegister')) {
+      this.router.navigate(['/dashboard/pageInicio'])
     }
   }
+}
 
   logout() {
     localStorage.removeItem('token')

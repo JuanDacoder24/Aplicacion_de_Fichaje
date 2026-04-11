@@ -10,3 +10,12 @@ export interface IUsuario {
     activo: boolean
 
 }
+
+export interface IUsuarioRegistro {
+    nombre: string
+    email: string
+    passwordHash: string
+    rol: number
+    departamento: number
+    activo: boolean
+}

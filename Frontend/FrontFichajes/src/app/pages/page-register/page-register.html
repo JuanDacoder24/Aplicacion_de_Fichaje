@@ -59,7 +59,8 @@
             <div>
               <label>Rol</label>
               <select formControlName="rol" [class.invalid]="checkControl('rol','required')">
-                @for (r of rol; track r.id) {
+                <option value="" disabled selected>Selecciona un rol</option>
+                @for (r of roles; track r.id) {
                   <option [ngValue]="r.id">{{ r.nombre }}</option>
                 }
               </select>
@@ -70,7 +71,8 @@
             <div>
               <label>Departamento</label>
               <select formControlName="departamento" [class.invalid]="checkControl('departamento','required')">
-                @for (d of departamento; track d.id) {
+                <option value="" disabled selected>Selecciona un departamento</option>
+                @for (d of departamentos; track d.id) {
                   <option [ngValue]="d.id">{{ d.nombre }}</option>
                 }
               </select>

@@ -30,19 +30,28 @@
 
         @if (esAdmin) {
         <li class="nav-item">
-          <a class="nav-link" [routerLink]="['/dashboard/pageRegister']" routerLinkActive="nav-link-active">Registrar</a>
+          <a class="nav-link" [routerLink]="['/dashboard/pageRegister']"
+            routerLinkActive="nav-link-active">Registrar</a>
         </li>
         <li class="nav-item">
           <a class="nav-link" [routerLink]="['/dashboard/pageUsuarios']" routerLinkActive="nav-link-active">Usuarios</a>
         </li>
         }
 
+        @if (!esAdmin) {
+        <li class="nav-item">
+          <span class="nav-link" style="color: rgba(255,255,255,0.6)">👤 {{ rolActual | titlecase }}</span>
+        </li>
+        }
+
+        @if (esAdmin) {
         <li class="nav-item dropdown">
           <select class="form-select-sm" (change)="cambiarRol($event)" [value]="rolActual">
             <option value="empleado">👤 Empleado</option>
             <option value="admin">👑 Admin</option>
           </select>
         </li>
+        }
 
         <li class="nav-item ms-sm-2">
           <button class="btn-clockin-sm" (click)="logout()">Log Out</button>

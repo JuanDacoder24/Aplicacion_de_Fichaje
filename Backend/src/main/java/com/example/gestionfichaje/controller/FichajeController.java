@@ -1,6 +1,5 @@
 package com.example.gestionfichaje.controller;
 
-import java.time.LocalDateTime;
 import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -21,7 +20,6 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.example.gestionfichaje.dto.FichajeDTO;
-import com.example.gestionfichaje.dto.RegisterUserRequest;
 import com.example.gestionfichaje.entity.Fichajes;
 import com.example.gestionfichaje.entity.Horarios;
 import com.example.gestionfichaje.entity.LoginRequest;
@@ -75,11 +73,27 @@ public class FichajeController {
     private RolRepository rolRepository;
 
     @PostMapping("/auth/register")
-public ResponseEntity<?> register(@RequestBody Map<String, Object> body) {
-    System.out.println("ENTRO A REGISTER");
-    System.out.println(body);
-    return ResponseEntity.ok(body);
-}
+    public ResponseEntity<?> register(@RequestBody Map<String, Object> body) {
+        try {
+            Usuarios usuario = new Usuarios();
+            usuario.setNombre((String) body.get("nombre"));
+            usuario.setEmail((String) body.get("email"));
+            usuario.setPasswordHash(passwordEncoder.encode((String) body.get("passwordHash")));
+            usuario.setDepartamento((Integer) body.get("departamento"));
+            usuario.setActivo((Boolean) body.get("activo"));
+
+            int rolId = (Integer) body.get("rol");
+            Rol rol = rolRepository.findById(rolId)
+                    .orElseThrow(() -> new RuntimeException("Rol no encontrado"));
+            usuario.setRol(rol);
+
+            Usuarios savedUsuario = fichajeServices.saveUsuario(usuario);
+            return ResponseEntity.ok(savedUsuario);
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body("Error al registrar: " + e.getMessage());
+        }
+    }
 
     @GetMapping("/usuarios")
     public ResponseEntity<?> getAllUsuarios() {

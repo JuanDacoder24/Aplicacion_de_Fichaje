@@ -2,7 +2,7 @@ import { Injectable, inject, signal } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { firstValueFrom } from 'rxjs';
 import { IUser } from '../interface/iuser';
-import { IUsuario } from '../interface/iusuario';
+import { IUsuario, IUsuarioRegistro } from '../interface/iusuario';
 
 @Injectable({
   providedIn: 'root',
@@ -50,7 +50,7 @@ export class AuthService {
   return res;
 }
 
-async register(usuario: IUsuario): Promise<any> {
+async register(usuario: IUsuarioRegistro): Promise<any> {
   return await firstValueFrom(
     this.httpClient.post<any>(`${this.authUrl}/register`, usuario, {
       headers: new HttpHeaders({

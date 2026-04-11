@@ -2,7 +2,7 @@ import { AuthService } from './../../services/auth-service';
 import { Component, inject, signal, OnInit } from '@angular/core';
 import { AbstractControl, FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
-import { IUsuario } from '../../interface/iusuario';
+import { IUsuario, IUsuarioRegistro } from '../../interface/iusuario';
 import { CommonModule } from '@angular/common';
 
 @Component({
@@ -12,34 +12,30 @@ import { CommonModule } from '@angular/common';
   styleUrl: './page-register.css',
 })
 export class PageRegister implements OnInit {
-  
+
   private authService = inject(AuthService);
   private router = inject(Router);
 
-  // Signals para estado reactivo
   public registerForm = signal<FormGroup>(new FormGroup({
-    id: new FormControl(-1),
     nombre: new FormControl(null, [Validators.required, Validators.minLength(3), Validators.maxLength(100)]),
     email: new FormControl(null, [Validators.required, Validators.pattern(/^[\w-.]+@([\w-]+\.)+[\w-]{2,4}$/)]),
     passwordHash: new FormControl(null, [Validators.required, Validators.minLength(6)]),
     repitePassword: new FormControl(null, [Validators.required, Validators.minLength(6)]),
-    rol: new FormControl(null, [Validators.required, Validators.min(1), Validators.max(2)]),
-    departamento: new FormControl(null, [Validators.required, Validators.min(1), Validators.max(7)]),
-    fechaAlta: new FormControl(Date.now()),
+    rol: new FormControl(null, [Validators.required]),
+    departamento: new FormControl(null, [Validators.required]),
     activo: new FormControl(true)
   }, [this.passValidator]));
 
   public usuarios = signal<IUsuario[]>([]);
   public isCargando = signal<boolean>(false);
-  public nextId = signal<number>(1);
+  public errorMensaje = signal<string>('');
 
-  // Datos estáticos (también podrían ser signals si cambian dinámicamente)
-  public rol = [
+  public roles = [
     { id: 1, nombre: 'Admin' },
     { id: 2, nombre: 'Empleado' }
   ];
 
-  public departamento = [
+  public departamentos = [
     { id: 1, nombre: 'RRHH' },
     { id: 2, nombre: 'IT' },
     { id: 3, nombre: 'VENTAS' },
@@ -50,10 +46,9 @@ export class PageRegister implements OnInit {
     this.cargarUsuarios();
   }
 
-  // Método para obtener los datos del formulario
   async getDataForm() {
     const form = this.registerForm();
-    
+
     if (form.invalid) {
       Object.keys(form.controls).forEach(key => {
         form.get(key)?.markAsTouched();
@@ -62,79 +57,81 @@ export class PageRegister implements OnInit {
     }
 
     this.isCargando.set(true);
+    this.errorMensaje.set('');
 
-    const usuario: IUsuario = {
-      id: this.nextId(),
+    // Solo enviamos los datos necesarios, el id y fechaAlta los gestiona el backend
+    const usuario = {
       nombre: form.get('nombre')?.value,
       email: form.get('email')?.value,
       passwordHash: form.get('passwordHash')?.value,
       rol: parseInt(form.get('rol')?.value),
       departamento: parseInt(form.get('departamento')?.value),
-      fechaAlta: Date.now(),
-      activo: form.get('activo')?.value
+      activo: form.get('activo')?.value ?? true
     };
 
     try {
       const response = await this.authService.register(usuario);
-      console.log('Respuesta:', response);
-      
-      // Actualizar señales
-      this.usuarios.update(prev => [...prev, usuario]);
-      this.nextId.update(id => id + 1);
+      console.log('Usuario registrado:', response);
+
+      // Recargamos la lista desde el backend para tener datos reales
+      await this.cargarUsuarios();
       this.resetForm();
 
       setTimeout(() => {
         this.router.navigate(['/dashboard/pageDocumentos']);
       }, 2000);
-    } catch (error) {
+
+    } catch (error: any) {
       console.error('Error al registrar:', error);
+      this.errorMensaje.set(error?.error || 'Error al registrar el usuario');
     } finally {
       this.isCargando.set(false);
     }
   }
 
-  getDepartamento(id: number): string {
-    return this.departamento.find(d => d.id === id)?.nombre || '-';
+  getRolNombre(id: number): string {
+    return this.roles.find(r => r.id === id)?.nombre || '-';
   }
 
-  // Resetear formulario
+  getDepartamento(id: number): string {
+    return this.departamentos.find(d => d.id === id)?.nombre || '-';
+  }
+
   resetForm() {
     const form = this.registerForm();
     form.reset({
-      id: -1,
       nombre: null,
       email: null,
       passwordHash: null,
       repitePassword: null,
       rol: null,
       departamento: null,
-      fechaAlta: Date.now(),
       activo: true
     });
 
-    // Marcar todos los campos como no tocados
     Object.keys(form.controls).forEach(key => {
-      const control = form.get(key);
-      control?.markAsUntouched();
+      form.get(key)?.markAsUntouched();
     });
   }
 
-  // Validador personalizado para verificar que las contraseñas coincidan
   passValidator(formValue: AbstractControl): any {
     const password = formValue.get('passwordHash')?.value;
     const repitePassword = formValue.get('repitePassword')?.value;
     return (password !== repitePassword) ? { 'passwordnotmatches': true } : null;
   }
 
-  // Método para verificar errores en controles específicos
   checkControl(formControlName: string, validator: string): boolean | undefined {
     const control = this.registerForm().get(formControlName);
     return control?.hasError(validator) && control?.touched;
   }
 
-  // Cargar usuarios existentes (ejemplo)
-  private cargarUsuarios() {
-    // Aquí cargarías usuarios desde un servicio si es necesario
-    // this.usuarios.set(usuariosExistentes);
+  // Carga los usuarios reales desde el backend
+  private async cargarUsuarios() {
+    try {
+      const usuarios = await this.authService.getUsuarios();
+      this.usuarios.set(usuarios);
+    } catch (error) {
+      console.error('Error al cargar usuarios:', error);
+    }
   }
 }
