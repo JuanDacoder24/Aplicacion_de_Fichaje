@@ -1,6 +1,7 @@
 package com.example.gestionfichaje.services;
 
 import com.example.gestionfichaje.dto.FichajeDTO;
+import com.example.gestionfichaje.dto.UsuarioDTO;
 import com.example.gestionfichaje.entity.Fichajes;
 import com.example.gestionfichaje.entity.Horarios;
 import com.example.gestionfichaje.entity.Solicitudes;
@@ -10,8 +11,8 @@ import com.example.gestionfichaje.repository.HorariosRepository;
 import com.example.gestionfichaje.repository.SolicitudesRepository;
 import com.example.gestionfichaje.repository.UsuariosRepository;
 import java.time.Duration;
-
 import java.util.Optional;
+import java.util.stream.Collectors;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -45,36 +46,39 @@ public class FichajeServices {
     }
 
     public Fichajes registrarEntrada(FichajeDTO req) {
-        Fichajes abierto = findAbierto(req.getUsuarioId(), LocalDate.parse(req.getFecha()));
-        if (abierto != null) {
-            throw new RuntimeException("Ya tienes entrada abierta para " + req.getFecha());
-        }
-
-        // Esto sirve para obtener el objeto Usuarios desde el repositorio
-        Usuarios usuario = usuariosRepository.findById(req.getUsuarioId())
-                .orElseThrow(() -> new RuntimeException("Usuario no encontrado: " + req.getUsuarioId()));
-
-        Fichajes fichaje = new Fichajes();
-        fichaje.setUsuario(usuario);
-        fichaje.setFecha(LocalDate.parse(req.getFecha()));
-        fichaje.setHoraEntrada(LocalDateTime.now());
-        fichaje.setDescansoMinutos(req.getDescansoMinutos());
-
-        return saveFichaje(fichaje);
+    // Convertir String a LocalDate correctamente
+    LocalDate fecha = LocalDate.parse(req.getFecha());
+    
+    Fichajes abierto = findAbierto(req.getUsuarioId(), fecha);
+    if (abierto != null) {
+        throw new RuntimeException("Ya tienes entrada abierta para " + req.getFecha());
     }
 
-    public Fichajes registrarSalida(FichajeDTO req) {
-        Fichajes abierto = findAbierto(req.getUsuarioId(), LocalDate.parse(req.getFecha()));
+    Usuarios usuario = usuariosRepository.findById(req.getUsuarioId())
+            .orElseThrow(() -> new RuntimeException("Usuario no encontrado: " + req.getUsuarioId()));
 
-        if (abierto == null) {
-            throw new RuntimeException("No tienes entrada abierta para cerrar");
-        }
+    Fichajes fichaje = new Fichajes();
+    fichaje.setUsuario(usuario);
+    fichaje.setFecha(fecha);  
+    fichaje.setHoraEntrada(LocalDateTime.now());
+    fichaje.setDescansoMinutos(req.getDescansoMinutos());
 
-        abierto.setHoraSalida(LocalDateTime.now());
-        calcularHorasTrabajadas(abierto);
+    return saveFichaje(fichaje);
+}
 
-        return saveFichaje(abierto);
+public Fichajes registrarSalida(FichajeDTO req) {
+    LocalDate fecha = LocalDate.parse(req.getFecha());
+    Fichajes abierto = findAbierto(req.getUsuarioId(), fecha);
+
+    if (abierto == null) {
+        throw new RuntimeException("No tienes entrada abierta para cerrar");
     }
+
+    abierto.setHoraSalida(LocalDateTime.now());
+    calcularHorasTrabajadas(abierto);
+
+    return saveFichaje(abierto);
+}
 
     private Fichajes findAbierto(Integer usuarioId, LocalDate fecha) {
         Optional<Fichajes> result = fichajesRepository.findByUsuarioIdAndFechaAndHoraSalidaIsNull(usuarioId, fecha);
@@ -170,4 +174,7 @@ public class FichajeServices {
     public void deleteUsuario(Integer id) {
         usuariosRepository.deleteById(id);
     }
+
+
+    
 }

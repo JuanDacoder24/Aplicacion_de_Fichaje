@@ -1,7 +1,9 @@
 export interface IUser {
+
     //admin
-    nombre: string;
+    nombre: string
 
     //admin123
-    password: string;
+    password: string
+
 }

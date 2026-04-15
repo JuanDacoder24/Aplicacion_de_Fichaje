@@ -1,1 +1,24 @@
-<p>page-inicio works!</p>
+<div class="container mt-5">
+  <div class="col-form">
+    <div class="card-glass">
+      @if(usuario()){
+        <h2 class="card-title">Bienvenido, <span class="accent">{{ usuario()?.nombre }}</span></h2>
+      }
+      <hr class="divider">
+      @if(fichando()){
+        <p class="card-sub">Tiempo fichado: <b>{{ tiempoFormateado() }}</b></p>
+      }
+      <button class="btn-clockin" (click)="botonFichaje()" [disabled]="cargando()" [class.activo]="fichando()">
+        {{ cargando() ? 'Procesando...' : fichando() ? '🔴 Registrar Salida' : '🟢 Registrar Entrada' }}
+      </button>
+      @if(error()){
+        <p class="err">{{ error() }}</p>
+      }
+    </div>
+  </div>
+</div>
+
+
+
+
+

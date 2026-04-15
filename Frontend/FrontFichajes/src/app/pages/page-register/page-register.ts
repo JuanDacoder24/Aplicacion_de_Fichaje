@@ -59,7 +59,6 @@ export class PageRegister implements OnInit {
     this.isCargando.set(true);
     this.errorMensaje.set('');
 
-    // Solo enviamos los datos necesarios, el id y fechaAlta los gestiona el backend
     const usuario = {
       nombre: form.get('nombre')?.value,
       email: form.get('email')?.value,
@@ -72,13 +71,11 @@ export class PageRegister implements OnInit {
     try {
       const response = await this.authService.register(usuario);
       console.log('Usuario registrado:', response);
-
-      // Recargamos la lista desde el backend para tener datos reales
       await this.cargarUsuarios();
       this.resetForm();
 
       setTimeout(() => {
-        this.router.navigate(['/dashboard/pageDocumentos']);
+        this.router.navigate(['/dashboard/pageUsuarios']);
       }, 2000);
 
     } catch (error: any) {

@@ -8,7 +8,6 @@ import { IUsuario, IUsuarioRegistro } from '../interface/iusuario';
   providedIn: 'root',
 })
 export class AuthService {
-
   private httpClient = inject(HttpClient);
 
   //he tenido que dividir las rutas para las distintas peticiones
@@ -19,6 +18,10 @@ export class AuthService {
   private rolSignal = signal<string>('');
   private tokenSignal = signal<string>('');
 
+  //guardo estos datos en el localStorage para no perder los datos si en caso se recarga la pantalla 
+  private idSignal = signal<number>(Number(localStorage.getItem('id')) || 0);
+  private nombreSignal = signal<string>(localStorage.getItem('nombre') || '');
+
   constructor() {
     const rol = localStorage.getItem('rol') || '';
     const token = localStorage.getItem('token') || '';
@@ -28,11 +31,9 @@ export class AuthService {
 
   private getAuthHeaders(): HttpHeaders {
     return new HttpHeaders({
-      Authorization: `Bearer ${this.tokenSignal()}`
+      Authorization: `Bearer ${this.tokenSignal()}`,
     });
   }
-
-
 
   get rol() {
     return this.rolSignal.asReadonly();
@@ -42,39 +43,45 @@ export class AuthService {
     return this.tokenSignal.asReadonly();
   }
 
+  get id() {
+    return this.idSignal.asReadonly();
+  }
+
+  get nombre() {
+    return this.nombreSignal.asReadonly();
+  }
+
   async login(user: IUser): Promise<any> {
-  const res = await firstValueFrom(
-    this.httpClient.post<any>(`${this.authUrl}/login`, user)
-  );
-  if (res.token && res.rol) this.setAuthData(res.token, res.rol);
-  return res;
-}
+    const res = await firstValueFrom(this.httpClient.post<any>(`${this.authUrl}/login`, user));
+    if (res.token && res.rol) this.setAuthData(res.token, res.rol, res.id, res.nombre)
+    return res;
+  }
 
-async register(usuario: IUsuarioRegistro): Promise<any> {
-  return await firstValueFrom(
-    this.httpClient.post<any>(`${this.authUrl}/register`, usuario, {
-      headers: new HttpHeaders({
-        Authorization: `Bearer ${this.tokenSignal()}`
-      })
-    })
-  );
-}
+  async register(usuario: IUsuarioRegistro): Promise<any> {
+    return await firstValueFrom(
+      this.httpClient.post<any>(`${this.authUrl}/register`, usuario, {
+        headers: new HttpHeaders({ Authorization: `Bearer ${this.tokenSignal()}` }),
+      }),
+    );
+  }
 
-async getUsuarios(): Promise<IUsuario[]> {
-  return await firstValueFrom(
-    this.httpClient.get<IUsuario[]>(this.usuariosUrl, {
-      headers: new HttpHeaders({
-        Authorization: `Bearer ${this.tokenSignal()}`
-      })
-    })
-  );
-}
+  async getUsuarios(): Promise<IUsuario[]> {
+    return await firstValueFrom(
+      this.httpClient.get<IUsuario[]>(this.usuariosUrl, {
+        headers: new HttpHeaders({ Authorization: `Bearer ${this.tokenSignal()}` }),
+      }),
+    );
+  }
 
-  setAuthData(token: string, rol: string) {
-    localStorage.setItem('token', token);
-    localStorage.setItem('rol', rol);
-    this.rolSignal.set(rol);
-    this.tokenSignal.set(token);
+  setAuthData(token: string, rol: string, id: number, nombre: string) {
+    localStorage.setItem('token', token)
+    localStorage.setItem('rol', rol)
+    localStorage.setItem('id', String(id))
+    localStorage.setItem('nombre', nombre)
+    this.tokenSignal.set(token)
+    this.rolSignal.set(rol)
+    this.idSignal.set(id)
+    this.nombreSignal.set(nombre)
   }
 
   cambiarRol(nuevoRol: string) {
