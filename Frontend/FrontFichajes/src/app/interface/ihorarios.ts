@@ -4,8 +4,8 @@ export interface IHorarios {
 
     id: number
     usuario: IUsuario
+    diaSemana: string
     horaInicio: Date
     horaFin: Date
-    horasSemanales: number
 
 }

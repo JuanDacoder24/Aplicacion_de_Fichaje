@@ -20,36 +20,31 @@
         </li>
 
         <li class="nav-item">
-          <a class="nav-link" [routerLink]="['/dashboard/pageDocumentos']"
-            routerLinkActive="nav-link-active">Documentos</a>
+          <a class="nav-link" [routerLink]="['/dashboard/pageDocumentos']" routerLinkActive="nav-link-active">Documentos</a>
         </li>
 
         <li class="nav-item">
-          <a class="nav-link" [routerLink]="['/dashboard/pageAnuncios']" routerLinkActive="nav-link-active">Anuncios</a>
+          <a class="nav-link" [routerLink]="['/dashboard/pageSolicitudes']" routerLinkActive="nav-link-active">Solicitudes</a>
         </li>
 
         @if (esAdmin) {
         <li class="nav-item">
-          <a class="nav-link" [routerLink]="['/dashboard/pageRegister']"
-            routerLinkActive="nav-link-active">Registrar</a>
+          <a class="nav-link" [routerLink]="['/dashboard/pageRegister']" routerLinkActive="nav-link-active">Registrar</a>
         </li>
         <li class="nav-item">
           <a class="nav-link" [routerLink]="['/dashboard/pageUsuarios']" routerLinkActive="nav-link-active">Usuarios</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" [routerLink]="['/dashboard/pageHorarios']" routerLinkActive="nav-link-active">Horarios</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" [routerLink]="['/dashboard/pageFichajes']" routerLinkActive="nav-link-active">Fichajes</a>
         </li>
         }
 
         @if (!esAdmin) {
         <li class="nav-item">
           <span class="nav-link" style="color: rgba(255,255,255,0.6)">👤 {{ rolActual | titlecase }}</span>
-        </li>
-        }
-
-        @if (esAdmin) {
-        <li class="nav-item dropdown">
-          <select class="form-select-sm" (change)="cambiarRol($event)" [value]="rolActual">
-            <option value="empleado">👤 Empleado</option>
-            <option value="admin">👑 Admin</option>
-          </select>
         </li>
         }
 

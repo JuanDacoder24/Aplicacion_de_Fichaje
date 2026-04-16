@@ -29,6 +29,13 @@ export class FichajeService {
     })
   }
 
+  async getUsuarios(): Promise<IUsuario[]> {
+    return await firstValueFrom(this.httpClient.get<IUsuario[]>(`${this.apiUrl}/usuarios`, {
+      headers: this.getAuthHeaders()
+    })
+    )
+  }
+
   async getUsuarioById(id: number): Promise<IUsuario> {
     return await firstValueFrom(this.httpClient.get<IUsuario>(`${this.apiUrl}/usuarios/${id}`, {
       headers: this.getAuthHeaders()
@@ -56,27 +63,27 @@ export class FichajeService {
     )
   }
 
- async createFichaje(tipo: 'ENTRADA' | 'SALIDA'): Promise<any> {
-  const ahora = new Date();
-  
-  // Envía solo la fecha (yyyy-MM-dd) que es lo que espera LocalDate
-  const fechaSolo = ahora.toISOString().split('T')[0]; // "2026-04-15"
-  
-  const body = {
-    usuarioId: this.authService.id(),
-    tipo: tipo,
-    fecha: new Date().toISOString().split('T')[0],   
-    descansoMinutos: 0
-  };
-  
-  console.log('Enviando:', body);
-  
-  return await firstValueFrom(
-    this.httpClient.post<any>(this.fichajesUrl, body, {
-      headers: this.getAuthHeaders()
-    })
-  );
-}
+  async createFichaje(tipo: 'ENTRADA' | 'SALIDA'): Promise<any> {
+    const ahora = new Date();
+
+    // Envía solo la fecha (yyyy-MM-dd) que es lo que espera LocalDate
+    const fechaSolo = ahora.toISOString().split('T')[0]; // "2026-04-15"
+
+    const body = {
+      usuarioId: this.authService.id(),
+      tipo: tipo,
+      fecha: new Date().toISOString().split('T')[0],
+      descansoMinutos: 0
+    };
+
+    console.log('Enviando:', body);
+
+    return await firstValueFrom(
+      this.httpClient.post<any>(this.fichajesUrl, body, {
+        headers: this.getAuthHeaders()
+      })
+    );
+  }
   async updateFichaje(id: number, fichaje: IFichajes): Promise<IFichajes> {
     return await firstValueFrom(this.httpClient.put<IFichajes>(`${this.fichajesUrl}/${id}`, fichaje, {
       headers: this.getAuthHeaders()
@@ -91,6 +98,15 @@ export class FichajeService {
     )
   }
 
+  async getFichajesPorRango(inicio: string, fin: string): Promise<any> {
+    return await firstValueFrom(this.httpClient.get<any>(`${this.fichajesUrl}/rango?inicio=${inicio}&fin=${fin}`,
+      {
+        headers: this.getAuthHeaders()
+
+      })
+    )
+  }
+
   // HORARIOS 
 
   async getHorarios(): Promise<IHorarios[]> {
@@ -100,11 +116,27 @@ export class FichajeService {
     )
   }
 
-  async createHorario(horario: IHorarios): Promise<IHorarios> {
-    return await firstValueFrom(this.httpClient.post<IHorarios>(this.horariosUrl, horario, {
-      headers: this.getAuthHeaders()
-    })
-    )
+  async createHorario(horario: any): Promise<any> {
+    try {
+      const response = await fetch('http://localhost:8080/api/horarios', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(horario)
+      });
+
+      if (!response.ok) {
+        const error = await response.text();
+        console.error('Error response:', error);
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      return await response.json();
+    } catch (error) {
+      console.error('Error en createHorario:', error);
+      throw error;
+    }
   }
 
   async updateHorario(id: number, horario: IHorarios): Promise<IHorarios> {
@@ -114,8 +146,8 @@ export class FichajeService {
     )
   }
 
-  async deleteHorario(usuarioId: number): Promise<any> {
-    return await firstValueFrom(this.httpClient.delete<any>(`${this.horariosUrl}/${usuarioId}`, {
+  async deleteHorario(id: number): Promise<any> {
+    return await firstValueFrom(this.httpClient.delete<any>(`${this.horariosUrl}/${id}`, {
       headers: this.getAuthHeaders()
     })
     )

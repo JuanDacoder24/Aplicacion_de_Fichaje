@@ -20,6 +20,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.example.gestionfichaje.dto.FichajeDTO;
+import com.example.gestionfichaje.dto.HorarioDTO;
 import com.example.gestionfichaje.entity.Fichajes;
 import com.example.gestionfichaje.entity.Horarios;
 import com.example.gestionfichaje.entity.LoginRequest;
@@ -141,6 +142,21 @@ public class FichajeController {
         return ResponseEntity.ok(fichajeServices.getAllFichajes(page, size));
     }
 
+    @GetMapping("/fichajes/rango")
+public ResponseEntity<?> getFichajesPorRango(
+        @RequestParam String inicio,
+        @RequestParam String fin) {
+
+    try {
+        return ResponseEntity.ok(
+            fichajeServices.getByRango(inicio, fin)
+        );
+    } catch (Exception e) {
+        return ResponseEntity.status(500)
+                .body("Error al filtrar fichajes");
+    }
+}
+
     @GetMapping("/fichajes/{usuarioId}")
     public ResponseEntity<?> getFichajesByUsuario(@PathVariable Integer usuarioId,
             @RequestParam(defaultValue = "0") int page,
@@ -207,12 +223,13 @@ public class FichajeController {
     }
 
     @PostMapping("/horarios")
-    public ResponseEntity<?> createHorario(@RequestBody Horarios horario) {
+    public ResponseEntity<?> createHorario(@RequestBody HorarioDTO dto) {
         try {
-            Horarios savedHorario = fichajeServices.saveHorario(horario);
-            return ResponseEntity.ok(savedHorario);
+            Horarios h = fichajeServices.crearHorario(dto);
+            return ResponseEntity.ok(h);
         } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error al crear el horario");
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body("Error al crear el horario");
         }
     }
 
@@ -227,13 +244,14 @@ public class FichajeController {
         }
     }
 
-    @DeleteMapping("/horarios/{usuarioId}")
-    public ResponseEntity<?> deleteHorario(@PathVariable Integer usuarioId) {
+    @DeleteMapping("/horarios/{id}")
+    public ResponseEntity<?> deleteHorario(@PathVariable Integer id) {
         try {
-            fichajeServices.deleteHorario(usuarioId);
+            fichajeServices.deleteHorario(id);
             return ResponseEntity.ok("Horario eliminado correctamente");
         } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error al eliminar el horario");
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body("Error al eliminar el horario");
         }
     }
 

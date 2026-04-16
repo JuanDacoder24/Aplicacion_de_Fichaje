@@ -1,7 +1,23 @@
 package com.example.gestionfichaje.services;
 
+import java.math.BigDecimal;
+import java.math.RoundingMode;
+import java.time.Duration;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
+import java.util.List;
+import java.util.Optional;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.stereotype.Service;
+
 import com.example.gestionfichaje.dto.FichajeDTO;
-import com.example.gestionfichaje.dto.UsuarioDTO;
+import com.example.gestionfichaje.dto.HorarioDTO;
+import com.example.gestionfichaje.entity.DiaSemana;
 import com.example.gestionfichaje.entity.Fichajes;
 import com.example.gestionfichaje.entity.Horarios;
 import com.example.gestionfichaje.entity.Solicitudes;
@@ -10,20 +26,6 @@ import com.example.gestionfichaje.repository.FichajesRepository;
 import com.example.gestionfichaje.repository.HorariosRepository;
 import com.example.gestionfichaje.repository.SolicitudesRepository;
 import com.example.gestionfichaje.repository.UsuariosRepository;
-import java.time.Duration;
-import java.util.Optional;
-import java.util.stream.Collectors;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Page;
-import org.springframework.stereotype.Service;
-
-import java.math.BigDecimal;
-import java.math.RoundingMode;
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.util.List;
 
 @Service
 public class FichajeServices {
@@ -41,9 +43,46 @@ public class FichajeServices {
     @Autowired
     private UsuariosRepository usuariosRepository;
 
+    @Autowired
+    private HorariosRepository repo;
+
+    public Horarios guardar(Horarios h) {
+        return repo.save(h);
+    }
+
+    public List<Horarios> obtenerPorUsuario(Long id) {
+        return repo.findByUsuarioId(id);
+    }
+
+    public List<Horarios> obtenerTodos() {
+        return repo.findAll();
+    }
+
     public Fichajes saveFichaje(Fichajes fichaje) {
         return fichajesRepository.save(fichaje);
     }
+
+    public Horarios crearHorario(HorarioDTO dto) {
+
+    Usuarios usuario = usuariosRepository.findById(dto.usuarioId)
+        .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
+
+    Horarios h = new Horarios();
+    h.setUsuario(usuario);
+    h.setDiaSemana(DiaSemana.valueOf(dto.diaSemana));
+    h.setHoraInicio(LocalTime.parse(dto.horaInicio));
+    h.setHoraFin(LocalTime.parse(dto.horaFin));
+
+    return horariosRepository.save(h);
+}
+
+public List<Fichajes> getByRango(String inicio, String fin) {
+
+    LocalDate fechaInicio = LocalDate.parse(inicio);
+    LocalDate fechaFin = LocalDate.parse(fin);
+
+    return fichajesRepository.findByFechaBetween(fechaInicio, fechaFin);
+}
 
     public Fichajes registrarEntrada(FichajeDTO req) {
     // Convertir String a LocalDate correctamente

@@ -7,11 +7,12 @@ import { Error404 } from './pages/error404/error404';
 import { PerfilUsuario } from './pages/perfil-usuario/perfil-usuario';
 import { PageInicio } from './pages/page-inicio/page-inicio';
 import { PageSolicitudes } from './pages/page-solicitudes/page-solicitudes';
-import { PageDocumentos } from './pages/page-documentos/page-documentos';
-import { PageAnuncios } from './pages/page-anuncios/page-anuncios';
 import { PageRegister } from './pages/page-register/page-register';
 import { roleGuard } from './guard/rol-guard';
 import { PageUsuarios } from './pages/page-usuarios/page-usuarios';
+import { PageDocumentos } from './pages/page-documentos/page-documentos';
+import { PageHorarios } from './pages/page-horarios/page-horarios';
+import { PageFichajes } from './pages/page-fichajes/page-fichajes';
 
 export const routes: Routes = [
     {path: '', pathMatch: 'full', redirectTo: 'landingPage'},
@@ -24,10 +25,11 @@ export const routes: Routes = [
             {path: 'perfilUsuario', component: PerfilUsuario},
             {path: 'pageInicio', component: PageInicio},
             {path: 'pageSolicitudes', component: PageSolicitudes},
-            {path: 'pageDocumentos', component: PageDocumentos},
-            {path: 'pageAnuncios', component: PageAnuncios},
             {path: 'pageUsuarios', component: PageUsuarios},
-            {path: 'pageRegister', component: PageRegister, canActivate: [roleGuard], data: {rol: 'admin'}}
+            {path: 'pageDocumentos', component: PageDocumentos},
+            {path: 'pageRegister', component: PageRegister, canActivate: [roleGuard], data: {rol: 'admin'}},
+            {path: 'pageHorarios', component: PageHorarios},
+            {path: 'pageFichajes', component: PageFichajes}
         ]
     },
     {path: 'error404', component: Error404},

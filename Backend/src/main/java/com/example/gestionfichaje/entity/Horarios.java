@@ -1,9 +1,13 @@
 package com.example.gestionfichaje.entity;
 
-import java.time.LocalDateTime;
+import java.time.LocalTime;
+
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
@@ -18,30 +22,33 @@ public class Horarios {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int id;
-    // Muchos horarios pertenecen a un usuario
+    
     @ManyToOne
     @JoinColumn(name = "usuario_id")
+    @JsonIgnoreProperties({"passwordHash", "rol", "departamento"})
     private Usuarios usuario;
 
+    @Enumerated(EnumType.STRING)
+    @Column(name = "dia_semana")
+    private DiaSemana diaSemana;
+
     @Column(name = "hora_inicio")
-    private LocalDateTime horaInicio;
+    private LocalTime horaInicio;
 
     @Column(name = "hora_fin")
-    private LocalDateTime horaFin;
-
-    @Column(name = "horas_semanales")
-    private int horasSemanales;
+    private LocalTime horaFin;
 
     public Horarios() {}
 
-    public Horarios(int id, Usuarios usuario, LocalDateTime horaInicio, LocalDateTime horaFin, int horasSemanales) {
+    public Horarios(int id, Usuarios usuario, DiaSemana diaSemana, LocalTime horaInicio, LocalTime horaFin) {
         this.id = id;
         this.usuario = usuario;
+        this.diaSemana = diaSemana;
         this.horaInicio = horaInicio;
         this.horaFin = horaFin;
-        this.horasSemanales = horasSemanales;
     }
 
+    // Getters y Setters
     public int getId() {
         return id;
     }
@@ -58,35 +65,27 @@ public class Horarios {
         this.usuario = usuario;
     }
 
-    public LocalDateTime getHoraInicio() {
+    public DiaSemana getDiaSemana() {
+        return diaSemana;
+    }
+
+    public void setDiaSemana(DiaSemana diaSemana) {
+        this.diaSemana = diaSemana;
+    }
+
+    public LocalTime getHoraInicio() {
         return horaInicio;
     }
 
-    public void setHoraInicio(LocalDateTime horaInicio) {
+    public void setHoraInicio(LocalTime horaInicio) {
         this.horaInicio = horaInicio;
     }
 
-    public LocalDateTime getHoraFin() {
+    public LocalTime getHoraFin() {
         return horaFin;
     }
 
-    public void setHoraFin(LocalDateTime horaFin) {
+    public void setHoraFin(LocalTime horaFin) {
         this.horaFin = horaFin;
     }
-
-    public int getHorasSemanales() {
-        return horasSemanales;
-    }
-
-    public void setHorasSemanales(int horasSemanales) {
-        this.horasSemanales = horasSemanales;
-    }
-
-    
-
-    
-
-
-
 }
-    

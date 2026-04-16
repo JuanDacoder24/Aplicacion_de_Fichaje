@@ -1,0 +1,68 @@
+<div class="container mt-4">
+  <h2>Gestión de Horarios</h2>
+
+  <div class="card p-3 mb-4">
+    <select 
+      [(ngModel)]="nuevoHorario.usuarioId" 
+      class="form-control mb-2"
+      name="usuarioId">
+      <option value="">Seleccionar usuario</option>
+      @for (u of usuarios; track u.id) {
+        <option [value]="u.id">{{u.nombre}}</option>
+      }
+    </select>
+
+    <select 
+      [(ngModel)]="nuevoHorario.diaSemana" 
+      class="form-control mb-2"
+      name="diaSemana">
+      <option value="">Día</option>
+      @for (d of dias; track d) {
+        <option [value]="d">{{d}}</option>
+      }
+    </select>
+
+    <input 
+      type="time" 
+      [(ngModel)]="nuevoHorario.horaInicio" 
+      class="form-control mb-2"
+      name="horaInicio">
+
+    <input 
+      type="time" 
+      [(ngModel)]="nuevoHorario.horaFin" 
+      class="form-control mb-2"
+      name="horaFin">
+
+    <button class="btn btn-primary" (click)="guardar()">Guardar</button>
+  </div>
+
+  <table class="table table-striped">
+    <thead>
+      <tr>
+        <th>Empleado</th>
+        <th>Día</th>
+        <th>Horario</th>
+        <th></th>
+      </tr>
+    </thead>
+    <tbody>
+      @for (h of horarios; track h.id) {
+        <tr>
+          <td>{{h.usuario?.nombre}}</td>
+          <td>{{h.diaSemana}}</td>
+          <td>{{h.horaInicio}} - {{h.horaFin}}</td>
+          <td>
+            <button class="btn btn-danger btn-sm" (click)="eliminar(h.id)">
+              Eliminar
+            </button>
+          </td>
+        </tr>
+      } @empty {
+        <tr>
+          <td colspan="4" class="text-center">No hay horarios registrados</td>
+        </tr>
+      }
+    </tbody>
+  </table>
+</div>
