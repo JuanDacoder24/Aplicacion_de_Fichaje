@@ -1,68 +1,80 @@
-<div class="container mt-4">
-  <h2>Gestión de Horarios</h2>
+<div class="page-wrapper">
+  <div class="layout">
+    <div class="col-form">
+      <p class="section-label">GESTIÓN DE HORARIOS</p>
 
-  <div class="card p-3 mb-4">
-    <select 
-      [(ngModel)]="nuevoHorario.usuarioId" 
-      class="form-control mb-2"
-      name="usuarioId">
-      <option value="">Seleccionar usuario</option>
-      @for (u of usuarios; track u.id) {
-        <option [value]="u.id">{{u.nombre}}</option>
-      }
-    </select>
+      <div class="card-glass">
+        <p class="card-title">Nuevo <span class="accent">Horario</span></p>
+        <p class="card-sub">Asigna turnos a los empleados</p>
 
-    <select 
-      [(ngModel)]="nuevoHorario.diaSemana" 
-      class="form-control mb-2"
-      name="diaSemana">
-      <option value="">Día</option>
-      @for (d of dias; track d) {
-        <option [value]="d">{{d}}</option>
-      }
-    </select>
+        <div class="field">
+          <label>Empleado</label>
+          <select [(ngModel)]="nuevoHorario.usuarioId">
+            <option value="">Seleccionar usuario</option>
+            @for (u of usuarios; track u.id) {
+              <option [value]="u.id">{{u.nombre}}</option>
+            }
+          </select>
+        </div>
 
-    <input 
-      type="time" 
-      [(ngModel)]="nuevoHorario.horaInicio" 
-      class="form-control mb-2"
-      name="horaInicio">
+        <div class="field">
+          <label>Día</label>
+          <select [(ngModel)]="nuevoHorario.diaSemana">
+            <option value="">Seleccionar día</option>
+            @for (d of dias; track d) {
+              <option [value]="d">{{d}}</option>
+            }
+          </select>
+        </div>
 
-    <input 
-      type="time" 
-      [(ngModel)]="nuevoHorario.horaFin" 
-      class="form-control mb-2"
-      name="horaFin">
+        <div class="grid-2">
+          <div>
+            <label>Inicio</label>
+            <input type="time" [(ngModel)]="nuevoHorario.horaInicio">
+          </div>
+          <div>
+            <label>Fin</label>
+            <input type="time" [(ngModel)]="nuevoHorario.horaFin">
+          </div>
+        </div>
 
-    <button class="btn btn-primary" (click)="guardar()">Guardar</button>
+        <div class="btn-row">
+          <button class="btn-secondary" (click)="nuevoHorario = {}">Limpiar</button>
+          <button class="btn-primary" (click)="guardar()">Guardar →</button>
+        </div>
+      </div>
+    </div>
   </div>
 
-  <table class="table table-striped">
-    <thead>
-      <tr>
-        <th>Empleado</th>
-        <th>Día</th>
-        <th>Horario</th>
-        <th></th>
-      </tr>
-    </thead>
-    <tbody>
-      @for (h of horarios; track h.id) {
-        <tr>
-          <td>{{h.usuario?.nombre}}</td>
-          <td>{{h.diaSemana}}</td>
-          <td>{{h.horaInicio}} - {{h.horaFin}}</td>
-          <td>
-            <button class="btn btn-danger btn-sm" (click)="eliminar(h.id)">
-              Eliminar
-            </button>
-          </td>
-        </tr>
-      } @empty {
-        <tr>
-          <td colspan="4" class="text-center">No hay horarios registrados</td>
-        </tr>
-      }
-    </tbody>
-  </table>
+  <!-- TABLA -->
+  <div class="table-wrapper">
+    <div class="table-card">
+      <table class="tabla">
+        <thead>
+          <tr>
+            <th>Empleado</th>
+            <th>Día</th>
+            <th>Horario</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (h of horarios; track h.id) {
+            <tr>
+              <td class="td-nombre">{{h.usuario?.nombre}}</td>
+              <td>{{h.diaSemana}}</td>
+              <td>{{h.horaInicio}} - {{h.horaFin}}</td>
+              <td>
+                <button class="btn-delete" (click)="eliminar(h.id)">Eliminar</button>
+              </td>
+            </tr>
+          } @empty {
+            <tr>
+              <td colspan="4" class="empty-state">No hay horarios registrados</td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+  </div>
 </div>

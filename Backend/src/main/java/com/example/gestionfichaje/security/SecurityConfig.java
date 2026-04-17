@@ -6,6 +6,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Lazy;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationManager;
 import static org.springframework.security.config.Customizer.withDefaults;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
@@ -35,11 +36,14 @@ public class SecurityConfig {
                 .csrf(csrf -> csrf.disable())
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers(org.springframework.http.HttpMethod.OPTIONS, "/**").permitAll()
-                        .requestMatchers("/publico/**").permitAll()
-                        .requestMatchers("/api/auth/login").permitAll()
-                        .requestMatchers("/api/auth/register").permitAll()
+                        .requestMatchers("/api/auth/login", "/api/auth/register").permitAll()
+                        .requestMatchers("/api/horarios").permitAll()  // ← TEMPORAL para test
+    .requestMatchers("/api/horarios/**").permitAll()
+                        .requestMatchers("/api/fichajes").hasAnyRole("ADMIN", "EMPLEADO", "RRHH")
+                        .requestMatchers("/api/fichajes/**").hasAnyRole("ADMIN", "EMPLEADO", "RRHH")
+                        .requestMatchers("/api/solicitudes").hasAnyRole("ADMIN", "RRHH")
+                        .requestMatchers("/api/solicitudes/**").hasAnyRole("ADMIN", "RRHH")
                         .requestMatchers("/api/usuarios").hasRole("ADMIN")
-                        .requestMatchers("/api/usuarios/{id}").hasAnyRole("ADMIN", "EMPLEADO")
                         .requestMatchers("/api/usuarios/**").hasRole("ADMIN")
                         .requestMatchers("/admin/**").hasRole("ADMIN")
                         .anyRequest().authenticated())

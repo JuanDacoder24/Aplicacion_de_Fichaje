@@ -34,7 +34,8 @@ export class PageHorarios implements OnInit {
   }
 
   async cargarHorarios() {
-    this.horarios = await this.fichajeService.getHorarios()
+  this.horarios = await this.fichajeService.getHorarios()
+  console.log('HORARIOS:', this.horarios)
   }
 
   async cargarUsuarios() {
