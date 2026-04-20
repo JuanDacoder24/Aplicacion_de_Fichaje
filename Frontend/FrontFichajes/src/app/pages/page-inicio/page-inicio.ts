@@ -1,4 +1,4 @@
-import { Component, inject, signal, OnInit } from '@angular/core';
+import { Component, inject, signal, OnInit, computed } from '@angular/core';
 import { AuthService } from '../../services/auth-service';
 import { FichajeService } from '../../services/fichaje-service';
 import { IUsuario } from '../../interface/iusuario';
@@ -36,6 +36,8 @@ export class PageInicio implements OnInit {
     }
   }
 
+  fechaHoy = computed(() => new Date().toLocaleDateString('es-ES', { weekday: 'long', day: 'numeric', month: 'long' }));
+  
   async verificarFichajeActivo(usuarioId: number) {
     try {
       const hoy = new Date().toISOString().split('T')[0]

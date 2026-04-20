@@ -1,9 +1,10 @@
 package com.example.gestionfichaje.controller;
 
+import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.userdetails.UserDetailsService;
@@ -136,33 +137,47 @@ public class FichajeController {
     }
 
     @GetMapping("/fichajes")
-    public ResponseEntity<Page<Fichajes>> getFichajes(
-            @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "100") int size) {
-        return ResponseEntity.ok(fichajeServices.getAllFichajes(page, size));
+    public ResponseEntity<List<FichajeDTO>> getFichajes() {
+        return ResponseEntity.ok(fichajeServices.getAllFichajesDTO());
     }
 
     @GetMapping("/fichajes/rango")
-public ResponseEntity<?> getFichajesPorRango(
-        @RequestParam String inicio,
-        @RequestParam String fin) {
-
-    try {
-        return ResponseEntity.ok(
-            fichajeServices.getByRango(inicio, fin)
-        );
-    } catch (Exception e) {
-        return ResponseEntity.status(500)
-                .body("Error al filtrar fichajes");
+    public ResponseEntity<?> getFichajesPorRango(
+            @RequestParam String inicio,
+            @RequestParam String fin) {
+        try {
+            List<FichajeDTO> dtos = fichajeServices.getByRango(inicio, fin)
+                .stream()
+                .map(fichaje -> {
+                    // Use the service's private toDTO method via a public wrapper
+                    return fichajeServices.getAllFichajesDTO().stream()
+                        .filter(dto -> dto.getId() == fichaje.getId())
+                        .findFirst().orElse(null);
+                })
+                .filter(dto -> dto != null)
+                .collect(Collectors.toList());
+            return ResponseEntity.ok(dtos);
+        } catch (Exception e) {
+            return ResponseEntity.status(500)
+                    .body("Error al filtrar fichajes");
+        }
     }
-}
 
     @GetMapping("/fichajes/{usuarioId}")
     public ResponseEntity<?> getFichajesByUsuario(@PathVariable Integer usuarioId,
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "100") int size) {
         try {
-            return ResponseEntity.ok(fichajeServices.getFichajesByUsuario(usuarioId, page, size));
+            List<FichajeDTO> dtos = fichajeServices.getFichajesByUsuario(usuarioId, page, size)
+                .stream()
+                .map(fichaje -> {
+                    return fichajeServices.getAllFichajesDTO().stream()
+                        .filter(dto -> dto.getId() == fichaje.getId())
+                        .findFirst().orElse(null);
+                })
+                .filter(dto -> dto != null)
+                .collect(Collectors.toList());
+            return ResponseEntity.ok(dtos);
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                     .body("Error al obtener los fichajes del usuario");

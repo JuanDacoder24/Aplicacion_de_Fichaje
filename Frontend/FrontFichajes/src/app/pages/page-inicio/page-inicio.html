@@ -1,24 +1,68 @@
-<div class="container mt-5">
-  <div class="col-form">
-    <div class="card-glass">
-      @if(usuario()){
-        <h2 class="card-title">Bienvenido, <span class="accent">{{ usuario()?.nombre }}</span></h2>
+<div class="inicio-wrapper">
+  <div class="hero-bg">
+    <div class="orb orb-1"></div>
+    <div class="orb orb-2"></div>
+  </div>
+
+  <div class="inicio-content">
+
+    @if(usuario()) {
+      <div class="greeting-block">
+        <p class="greeting-eyebrow">👋 Hola de nuevo</p>
+        <h1 class="greeting-title">Bienvenido, <span class="accent">{{ usuario()?.nombre }}</span></h1>
+        <p class="greeting-sub">{{ fechaHoy() }}</p>
+      </div>
+    }
+
+    <div class="card-glass ficha-card">
+
+      <div class="status-row">
+        <span class="status-dot" [class.activo]="fichando()"></span>
+        <span class="status-label">{{ fichando() ? 'Jornada en curso' : 'Sin fichar' }}</span>
+      </div>
+
+      @if(fichando()) {
+        <div class="timer-block">
+          <p class="timer-label">Tiempo trabajado</p>
+          <p class="timer-display">{{ tiempoFormateado() }}</p>
+        </div>
+      } @else {
+        <div class="idle-block">
+          <div class="clock-icon">🕐</div>
+          <p class="idle-text">Registra tu entrada para comenzar la jornada</p>
+        </div>
       }
+
       <hr class="divider">
-      @if(fichando()){
-        <p class="card-sub">Tiempo fichado: <b>{{ tiempoFormateado() }}</b></p>
-      }
-      <button class="btn-clockin" (click)="botonFichaje()" [disabled]="cargando()" [class.activo]="fichando()">
-        {{ cargando() ? 'Procesando...' : fichando() ? '🔴 Registrar Salida' : '🟢 Registrar Entrada' }}
+
+      <button
+        class="btn-clockin"
+        (click)="botonFichaje()"
+        [disabled]="cargando()"
+        [class.salida]="fichando()">
+        @if(cargando()) {
+          <span class="spinner"></span> Procesando...
+        } @else if(fichando()) {
+          🔴 Registrar Salida
+        } @else {
+          🟢 Registrar Entrada
+        }
       </button>
-      @if(error()){
-        <p class="err">{{ error() }}</p>
+
+      @if(error()) {
+        <p class="err mt-2">{{ error() }}</p>
       }
+    </div>
+
+    <div class="stats-row card-glass">
+      <div class="stat-card">
+        <p class="stat-value">8h</p>
+        <p class="stat-label">Jornada objetivo</p>
+      </div>
+      <div class="stat-card">
+        <p class="stat-value">{{ fichando() ? tiempoFormateado() : '—' }}</p>
+        <p class="stat-label">Hoy fichado</p>
+      </div>
     </div>
   </div>
 </div>
-
-
-
-
-

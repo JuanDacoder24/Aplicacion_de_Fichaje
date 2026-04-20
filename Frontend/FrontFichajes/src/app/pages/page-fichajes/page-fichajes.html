@@ -1,1 +1,133 @@
-<p>page-fichajes works!</p>
+<div class="fichajes-wrapper">
+
+    <div class="page-header">
+        <div>
+            <p class="section-label">Panel de administración</p>
+            <h1 class="page-title">Fichajes <span class="accent">Empleados</span></h1>
+        </div>
+        <div class="header-meta">
+            <span class="badge-total">
+                {{ fichajeFiltrados().length }} registros
+            </span>
+        </div>
+    </div>
+
+    <div class="filter-bar card-glass">
+        <div class="filter-field">
+            <label>Filtrar por empleado</label>
+            <select [(ngModel)]="filtroUsuarioId" (ngModelChange)="filtroUsuarioId.set($event)">
+                <option value="">Todos los empleados</option>
+                @for (u of usuarios(); track u.id) {
+                <option [value]="u.id">{{ u.nombre }}</option>
+                }
+            </select>
+        </div>
+        @if(filtroUsuarioId()) {
+        <button class="btn-clear" (click)="filtroUsuarioId.set('')">✕ Limpiar filtro</button>
+        }
+    </div>
+
+    @if(error()) {
+    <p class="err">{{ error() }}</p>
+    }
+
+    <div class="table-card" [class.loading]="cargando()">
+
+        @if(cargando()) {
+        <div class="loading-overlay">
+            <div class="spinner-lg"></div>
+        </div>
+        }
+
+        <table class="tabla">
+            <thead>
+                <tr>
+                    <th scope="col">Empleado</th>
+                    <th scope="col">Departamento</th>
+                    <th scope="col">Fecha</th>
+                    <th scope="col">Entrada</th>
+                    <th scope="col">Salida</th>
+                    <th scope="col">Descanso</th>
+                    <th scope="col">Horas</th>
+                    <th scope="col"></th>
+                </tr>
+            </thead>
+            <tbody>
+                @for (f of fichajeFiltrados(); track f.id) {
+                <tr>
+                    <td class="td-nombre">{{ f.usuario?.nombre || 'Sin nombre' }}</td>
+                    <td>
+                        <span class="badge-dept">
+                            {{ getNombreDepartamento(f) }}
+                        </span>
+                    </td>
+                    <td>{{ formatFecha(f.fecha) }}</td>
+                    <td class="td-hora entrada">{{ formatHora(f.horaEntrada) }}</td>
+                    <td class="td-hora salida">{{ formatHora(f.horaSalida) }}</td>
+                    <td class="td-descanso">{{ f.descansoMinutos || 0 }} m</td>
+                    <td>
+                        <span class="badge-horas">{{ formatHoras(f.horasTrabajadas) }}</span>
+                    </td>
+                    <td class="td-actions">
+                        <button class="btn-edit" (click)="abrirEdicion(f)" title="Editar">✏️</button>
+                        <button class="btn-delete" (click)="eliminar(f.id)" title="Eliminar">🗑️</button>
+                    </td>
+                </tr>
+                } @empty {
+                <tr>
+                    <td colspan="8" class="empty-state">
+                        <div class="empty-icon">📋</div>
+                        <p>No hay fichajes registrados</p>
+                    </td>
+                </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+
+</div>
+
+@if(modalAbierto() && fichajeEditando()) {
+<div class="modal-backdrop" (click)="cerrarModal()">
+    <div class="modal-card card-glass" (click)="$event.stopPropagation()">
+
+        <div class="modal-header">
+            <h3 class="card-title">Editar <span class="accent">Fichaje</span></h3>
+            <button class="btn-close-modal" (click)="cerrarModal()">✕</button>
+        </div>
+
+        <p class="card-sub">{{ fichajeEditando()!.usuario?.nombre }} · {{ formatFecha(fichajeEditando()!.fecha) }}</p>
+
+        <div class="grid-2">
+            <div class="field">
+                <label>Hora Entrada</label>
+                <input type="time" [ngModel]="formatHora(fichajeEditando()!.horaEntrada)"
+                    (ngModelChange)="fichajeEditando.update(f => f ? {...f, horaEntrada: $event} : f)">
+            </div>
+            <div class="field">
+                <label>Hora Salida</label>
+                <input type="time" [ngModel]="formatHora(fichajeEditando()!.horaSalida)"
+                    (ngModelChange)="fichajeEditando.update(f => f ? {...f, horaSalida: $event} : f)">
+            </div>
+        </div>
+
+        <div class="field">
+            <label>Descanso (minutos)</label>
+            <input type="number" min="0" [ngModel]="fichajeEditando()!.descansoMinutos"
+                (ngModelChange)="fichajeEditando.update(f => f ? {...f, descansoMinutos: $event} : f)">
+        </div>
+
+        <div class="field">
+            <label>Comentario</label>
+            <input type="text" placeholder="Comentario opcional" [ngModel]="fichajeEditando()!.comentario"
+                (ngModelChange)="fichajeEditando.update(f => f ? {...f, comentario: $event} : f)">
+        </div>
+
+        <div class="btn-row">
+            <button class="btn-secondary" (click)="cerrarModal()">Cancelar</button>
+            <button class="btn-primary" (click)="guardarEdicion()">Guardar →</button>
+        </div>
+
+    </div>
+</div>
+}

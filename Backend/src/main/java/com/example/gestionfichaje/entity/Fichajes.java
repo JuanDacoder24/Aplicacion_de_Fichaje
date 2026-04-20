@@ -4,6 +4,8 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -39,11 +41,12 @@ public class Fichajes {
     private Integer descansoMinutos;
 
     @Column(name = "horas_trabajadas")
-    private int horasTrabajadas;
+    private Integer horasTrabajadas;
 
     @OneToMany(mappedBy = "fichaje", cascade = CascadeType.ALL)
     private List<Ubicacion> ubicacion;
 
+    @JsonIgnore
     @OneToMany(mappedBy = "fichaje", cascade = CascadeType.ALL)
     private List<Solicitudes> solicitudes;
 
@@ -59,7 +62,7 @@ public class Fichajes {
         this.horaEntrada = horaEntrada;
         this.horaSalida = horaSalida;
         this.descansoMinutos = descansoMinutos;
-        this.horasTrabajadas = horasTrabajadas;
+        this.horasTrabajadas = 0;
         this.comentario = comentario;
     }
 
@@ -71,6 +74,7 @@ public class Fichajes {
         this.id = id;
     }
 
+    @JsonIgnore
     public Usuarios getUsuario() {
         return usuario;
     }
@@ -128,7 +132,7 @@ public class Fichajes {
     }
 
     public int getHorasTrabajadas() {
-        return horasTrabajadas;
+        return horasTrabajadas != null ? horasTrabajadas : 0;
     }
 
     public void setHorasTrabajadas(int horasTrabajadas) {

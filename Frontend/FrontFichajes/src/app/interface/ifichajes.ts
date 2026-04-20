@@ -3,7 +3,7 @@ import { IUsuario } from "./iusuario"
 export interface IFichajes {
 
     id: number
-    usuario: IUsuario
+    usuario?: IUsuario
     fecha: Date
     horaEntrada: Date
     horaSalida: Date

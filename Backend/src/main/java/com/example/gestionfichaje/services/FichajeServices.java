@@ -8,6 +8,7 @@ import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -214,6 +215,26 @@ public Fichajes registrarSalida(FichajeDTO req) {
         usuariosRepository.deleteById(id);
     }
 
+    public List<FichajeDTO> getAllFichajesDTO() {
+        return fichajesRepository.findAll().stream().map(this::toDTO).collect(Collectors.toList());
+    }
 
-    
+    // Mapeo de entidad Fichajes a FichajeDTO
+    private FichajeDTO toDTO(Fichajes f) {
+        FichajeDTO dto = new FichajeDTO();
+        dto.setId(f.getId());
+        dto.setUsuarioId(f.getUsuario() != null ? f.getUsuario().getId() : 0);
+        dto.setFecha(f.getFecha() != null ? f.getFecha().toString() : null);
+        dto.setHora(f.getHoraEntrada());
+        dto.setHoraEntrada(f.getHoraEntrada());
+        dto.setHoraSalida(f.getHoraSalida());
+        dto.setHorasTrabajadas(f.getHorasTrabajadas());
+        dto.setTipo(f.getHoraSalida() == null ? "ENTRADA" : "SALIDA");
+        dto.setDescansoMinutos(f.getDescansoMinutos() != null ? f.getDescansoMinutos() : 0);
+        if (f.getUsuario() != null) {
+            dto.setNombreUsuario(f.getUsuario().getNombre());
+            dto.setDepartamento(String.valueOf(f.getUsuario().getDepartamento()));
+        }
+        return dto;
+    }
 }
