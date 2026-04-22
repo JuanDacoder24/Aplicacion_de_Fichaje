@@ -66,8 +66,7 @@ export class FichajeService {
   async createFichaje(tipo: 'ENTRADA' | 'SALIDA'): Promise<any> {
     const ahora = new Date();
 
-    // Envía solo la fecha (yyyy-MM-dd) que es lo que espera LocalDate
-    const fechaSolo = ahora.toISOString().split('T')[0]; // "2026-04-15"
+    const fechaSolo = ahora.toISOString().split('T')[0]; 
 
     const body = {
       usuarioId: this.authService.id(),
@@ -105,6 +104,13 @@ export class FichajeService {
 
       })
     )
+  }
+
+  async getFichajeAbierto(usuarioId: number, fecha: string): Promise<any> {
+    return await firstValueFrom(this.httpClient.get<any>(
+      `${this.fichajesUrl}/abierto?usuarioId=${usuarioId}&fecha=${fecha}`,
+      { headers: this.getAuthHeaders() }
+    ));
   }
 
   // HORARIOS 

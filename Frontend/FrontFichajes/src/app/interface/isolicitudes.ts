@@ -4,9 +4,10 @@ import { IUsuario } from "./iusuario"
 export interface ISolicitudes {
 
     id: number
-    usuario: IUsuario
+    usuario?: IUsuario
     fichaje: IFichajes
     motivo: string
     estado: string 
+    fechaSolicitud: Date
     
 }

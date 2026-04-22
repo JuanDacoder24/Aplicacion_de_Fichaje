@@ -319,4 +319,21 @@ public class FichajeController {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error al eliminar la solicitud");
         }
     }
+
+    @GetMapping("/fichajes/abierto")
+    public ResponseEntity<?> getFichajeAbierto(@RequestParam Integer usuarioId, @RequestParam String fecha) {
+        try {
+            Fichajes abierto = fichajeServices.findAbierto(usuarioId, java.time.LocalDate.parse(fecha));
+            if (abierto != null) {
+                // Devuelve el DTO del fichaje abierto
+                return ResponseEntity.ok(fichajeServices.getAllFichajesDTO().stream()
+                    .filter(dto -> dto.getId() == abierto.getId())
+                    .findFirst().orElse(null));
+            } else {
+                return ResponseEntity.ok(null);
+            }
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error al consultar fichaje abierto");
+        }
+    }
 }

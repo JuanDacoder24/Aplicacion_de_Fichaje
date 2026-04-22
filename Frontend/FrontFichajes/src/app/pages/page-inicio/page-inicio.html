@@ -8,7 +8,6 @@
 
     @if(usuario()) {
       <div class="greeting-block">
-        <p class="greeting-eyebrow">👋 Hola de nuevo</p>
         <h1 class="greeting-title">Bienvenido, <span class="accent">{{ usuario()?.nombre }}</span></h1>
         <p class="greeting-sub">{{ fechaHoy() }}</p>
       </div>
@@ -28,7 +27,6 @@
         </div>
       } @else {
         <div class="idle-block">
-          <div class="clock-icon">🕐</div>
           <p class="idle-text">Registra tu entrada para comenzar la jornada</p>
         </div>
       }
@@ -43,9 +41,9 @@
         @if(cargando()) {
           <span class="spinner"></span> Procesando...
         } @else if(fichando()) {
-          🔴 Registrar Salida
+           Registrar Salida
         } @else {
-          🟢 Registrar Entrada
+           Registrar Entrada
         }
       </button>
 

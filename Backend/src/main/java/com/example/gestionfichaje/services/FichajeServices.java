@@ -28,6 +28,7 @@ import com.example.gestionfichaje.repository.HorariosRepository;
 import com.example.gestionfichaje.repository.SolicitudesRepository;
 import com.example.gestionfichaje.repository.UsuariosRepository;
 
+
 @Service
 public class FichajeServices {
 
@@ -120,7 +121,8 @@ public Fichajes registrarSalida(FichajeDTO req) {
     return saveFichaje(abierto);
 }
 
-    private Fichajes findAbierto(Integer usuarioId, LocalDate fecha) {
+    // Hacer público para el controlador
+    public Fichajes findAbierto(Integer usuarioId, LocalDate fecha) {
         Optional<Fichajes> result = fichajesRepository.findByUsuarioIdAndFechaAndHoraSalidaIsNull(usuarioId, fecha);
         return result.orElse(null);
     }
@@ -237,4 +239,6 @@ public Fichajes registrarSalida(FichajeDTO req) {
         }
         return dto;
     }
+
+    
 }
