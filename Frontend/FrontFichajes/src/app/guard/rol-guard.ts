@@ -22,11 +22,10 @@ export const roleGuard: CanActivateFn = (route, state) => {
   }
 
   const hasRequiredRole = authService.hasRole(requiredRole)
-  console.log('Tiene el rol?', hasRequiredRole)
 
   if (!hasRequiredRole) {
 
-    if (state.url.includes('pageRegister')) {
+    if (state.url.includes('pageRegister') || ('pageHorarios') || ('pageFichajes')) {
       router.navigate(['/dashboard/pageInicio'])
     } else {
       Swal.fire({

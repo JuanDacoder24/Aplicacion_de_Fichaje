@@ -1,5 +1,7 @@
 package com.example.gestionfichaje.entity;
 
+import java.time.LocalDateTime;
+
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -19,22 +21,23 @@ public class Solicitudes {
     @JoinColumn(name = "usuario_id")
     private Usuarios usuario;
 
-    // Muchas solicitudes pertenecen a un fichaje
     @ManyToOne
     @JoinColumn(name = "fichaje_id")
     private Fichajes fichaje;
 
     private String motivo;
     private String estado;
+    private LocalDateTime fechaSolicitud;
 
     public Solicitudes() {} 
 
-    public Solicitudes(int id, Usuarios usuario, Fichajes fichaje, String motivo, String estado) {
+    public Solicitudes(int id, Usuarios usuario, Fichajes fichaje, String motivo, String estado, LocalDateTime fechaSolicitud) {
         this.id = id;
         this.usuario = usuario;
         this.fichaje = fichaje;
         this.motivo = motivo;
         this.estado = estado;
+        this.fechaSolicitud = LocalDateTime.now();
     }
 
     public int getId() {
@@ -75,6 +78,14 @@ public class Solicitudes {
 
     public void setEstado(String estado) {
         this.estado = estado;
+    }
+
+    public LocalDateTime getFechaSolicitud() {
+        return fechaSolicitud;
+    }
+    
+    public void setFechaSolicitud(LocalDateTime fechaSolicitud) {
+        this.fechaSolicitud = fechaSolicitud;
     }
 
     

@@ -40,11 +40,9 @@ public class JustificanteService {
     public Justificante guardar(MultipartFile archivo, String tipoDocumento,
                                 Integer fichajeId, String emailUsuario) throws IOException {
 
-        // Crear directorio si no existe
         Path dirPath = Paths.get(directorioUpload);
         Files.createDirectories(dirPath);
 
-        // Nombre único para evitar colisiones
         String nombreUnico = UUID.randomUUID() + "_" + archivo.getOriginalFilename();
         Path rutaFinal = dirPath.resolve(nombreUnico);
         Files.copy(archivo.getInputStream(), rutaFinal, StandardCopyOption.REPLACE_EXISTING);
@@ -80,7 +78,7 @@ public class JustificanteService {
         return resource;
     }
 
-    public Justificante revisar(Integer id, String estado,
+    public Justificante revisar(Integer id, EstadoJustificante estado,
                                 String comentario, String emailAdmin) {
         Justificante j = justificanteRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Justificante no encontrado"));
@@ -88,7 +86,7 @@ public class JustificanteService {
         Usuarios admin = usuariosRepository.findByEmail(emailAdmin)
                 .orElseThrow(() -> new RuntimeException("Admin no encontrado"));
 
-        j.setEstado(EstadoJustificante.valueOf(estado));
+        j.setEstado(EstadoJustificante.PENDIENTE);
         j.setComentarioAdmin(comentario);
         j.setFechaRevision(LocalDateTime.now());
         j.setRevisadoPor(admin);

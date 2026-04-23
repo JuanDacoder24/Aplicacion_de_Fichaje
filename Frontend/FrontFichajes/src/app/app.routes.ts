@@ -28,8 +28,8 @@ export const routes: Routes = [
             {path: 'pageUsuarios', component: PageUsuarios},
             {path: 'pageDocumentos', component: PageDocumentos},
             {path: 'pageRegister', component: PageRegister, canActivate: [roleGuard], data: {rol: 'admin'}},
-            {path: 'pageHorarios', component: PageHorarios},
-            {path: 'pageFichajes', component: PageFichajes}
+            {path: 'pageHorarios', component: PageHorarios, canActivate: [roleGuard], data: {rol: 'admin'}},
+            {path: 'pageFichajes', component: PageFichajes, canActivate: [roleGuard], data: {rol: 'admin'}}
         ]
     },
     {path: 'error404', component: Error404},

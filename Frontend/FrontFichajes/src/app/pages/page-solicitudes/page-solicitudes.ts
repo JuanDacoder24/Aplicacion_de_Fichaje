@@ -1,9 +1,11 @@
-import { Component, inject, signal } from '@angular/core';
-import { FichajeService } from '../../services/fichaje-service';
-import { AuthService } from '../../services/auth-service';
-import { ISolicitudes } from '../../interface/isolicitudes';
-import Swal from 'sweetalert2';
-import { CommonModule } from '@angular/common';
+import { Component, inject, signal } from '@angular/core'
+import { FichajeService } from '../../services/fichaje-service'
+import { AuthService } from '../../services/auth-service'
+import { EstadisticasSolicitudesDTO, FiltroSolicitudesDTO, ISolicitudes, RevisionSolicitudDTO } from '../../interface/isolicitudes'
+import { CommonModule } from '@angular/common'
+import { HttpClient, HttpParams } from '@angular/common/http'
+import { firstValueFrom } from 'rxjs'
+import { IJustificante } from '../../interface/ijustificante'
 
 @Component({
   selector: 'app-page-solicitudes',
@@ -13,12 +15,34 @@ import { CommonModule } from '@angular/common';
 })
 export class PageSolicitudes {
 
+  esAdmin = false
+  archivo: File | null = null
+  filtroEstado = 'TODAS'
+  comentarioAdmin = ''
 
+  private http = inject(HttpClient)
+
+  private apiUrl = '/api/solicitudes'
+  private justificantesUrl = '/api/justificantes'
 
   private authService = inject(AuthService)
   private fichajeService = inject(FichajeService)
 
   solicitudes = signal<ISolicitudes[]>([])
+
+  nuevaSolicitud = {
+    tipoDocumento: 'JUSTIFICANTE_FALTA',
+    fichajeId: null as number | null,
+    motivo: ''
+  }
+
+  tiposDocumento = [
+    { value: 'JUSTIFICANTE_FALTA', label: 'Justificante de falta' },
+    { value: 'BAJA_MEDICA',        label: 'Baja médica' },
+    { value: 'CITA_MEDICA',        label: 'Cita médica' },
+    { value: 'MOD_FICHAJE',        label: 'Modificación fichaje' },
+    { value: 'OTROS',              label: 'Otros' }
+  ]
 
   async ngOnInit() {
   const id = this.authService.id()
@@ -33,68 +57,11 @@ export class PageSolicitudes {
   }
 }
 
-  formatHora(fecha: Date | string | null): string {
-    if (!fecha) return '—'
-    return new Date(fecha).toLocaleTimeString('es-ES', {
-      hour: '2-digit', minute: '2-digit'
-    })
-  }
+  
+  
 
-  formatFecha(fecha: Date | string | null): string {
-    if (!fecha) return '—'
-    return new Date(fecha).toLocaleDateString('es-ES', {
-      day: '2-digit', month: '2-digit', year: 'numeric'
-    })
-  }
+  
+  
 
-  async rechazar(id: number) {
-    try {
-      await this.fichajeService.deleteFichaje(id)
-      this.solicitudes.update(list => list.filter(f => f.id !== id))
-    } catch (e) {
-      Swal.fire({
-        icon: "error",
-        title: "Oops...",
-        background: '#0d2a4a',
-        color: 'white',
-        confirmButtonColor: '#27ae60',
-        text: "No se pudo eliminar la solicitud",
-      });
-    }
-  }
-
-  async aprobar(id: number) {
-  try {
-    // Asumiendo que tienes un método para aprobar
-    // await this.fichajeService.aprobarSolicitud(id)
-    
-    // Actualizar el estado localmente
-    this.solicitudes.update(list => 
-      list.map(solicitud => 
-        solicitud.id === id 
-          ? { ...solicitud, estado: 'Aprobada' } 
-          : solicitud
-      )
-    )
-    
-    Swal.fire({
-      icon: "success",
-      title: "¡Aprobada!",
-      background: '#0d2a4a',
-      color: 'white',
-      confirmButtonColor: '#27ae60',
-      text: "Solicitud aprobada correctamente",
-    });
-  } catch (e) {
-    Swal.fire({
-      icon: "error",
-      title: "Oops...",
-      background: '#0d2a4a',
-      color: 'white',
-      confirmButtonColor: '#27ae60',
-      text: "No se pudo aprobar la solicitud",
-    });
-  }
-}
-
+  
 }

@@ -19,11 +19,13 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.multipart.MultipartFile;
 
 import com.example.gestionfichaje.dto.FichajeDTO;
 import com.example.gestionfichaje.dto.HorarioDTO;
 import com.example.gestionfichaje.entity.Fichajes;
 import com.example.gestionfichaje.entity.Horarios;
+import com.example.gestionfichaje.entity.Justificante;
 import com.example.gestionfichaje.entity.LoginRequest;
 import com.example.gestionfichaje.entity.Rol;
 import com.example.gestionfichaje.entity.Solicitudes;
@@ -32,6 +34,11 @@ import com.example.gestionfichaje.repository.RolRepository;
 import com.example.gestionfichaje.security.JwtUtil;
 import com.example.gestionfichaje.security.UserDetailsImpl;
 import com.example.gestionfichaje.services.FichajeServices;
+
+import org.springframework.core.io.Resource;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
+import org.springframework.security.core.Authentication;
 
 @RestController
 @RequestMapping("/api")
@@ -147,15 +154,15 @@ public class FichajeController {
             @RequestParam String fin) {
         try {
             List<FichajeDTO> dtos = fichajeServices.getByRango(inicio, fin)
-                .stream()
-                .map(fichaje -> {
-                    // Use the service's private toDTO method via a public wrapper
-                    return fichajeServices.getAllFichajesDTO().stream()
-                        .filter(dto -> dto.getId() == fichaje.getId())
-                        .findFirst().orElse(null);
-                })
-                .filter(dto -> dto != null)
-                .collect(Collectors.toList());
+                    .stream()
+                    .map(fichaje -> {
+                        // Use the service's private toDTO method via a public wrapper
+                        return fichajeServices.getAllFichajesDTO().stream()
+                                .filter(dto -> dto.getId() == fichaje.getId())
+                                .findFirst().orElse(null);
+                    })
+                    .filter(dto -> dto != null)
+                    .collect(Collectors.toList());
             return ResponseEntity.ok(dtos);
         } catch (Exception e) {
             return ResponseEntity.status(500)
@@ -169,14 +176,14 @@ public class FichajeController {
             @RequestParam(defaultValue = "100") int size) {
         try {
             List<FichajeDTO> dtos = fichajeServices.getFichajesByUsuario(usuarioId, page, size)
-                .stream()
-                .map(fichaje -> {
-                    return fichajeServices.getAllFichajesDTO().stream()
-                        .filter(dto -> dto.getId() == fichaje.getId())
-                        .findFirst().orElse(null);
-                })
-                .filter(dto -> dto != null)
-                .collect(Collectors.toList());
+                    .stream()
+                    .map(fichaje -> {
+                        return fichajeServices.getAllFichajesDTO().stream()
+                                .filter(dto -> dto.getId() == fichaje.getId())
+                                .findFirst().orElse(null);
+                    })
+                    .filter(dto -> dto != null)
+                    .collect(Collectors.toList());
             return ResponseEntity.ok(dtos);
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
@@ -320,15 +327,83 @@ public class FichajeController {
         }
     }
 
+    @PostMapping("/justificantes/subir")
+    public ResponseEntity<?> subirJustificante(
+            @RequestParam("archivo") MultipartFile archivo,
+            @RequestParam("tipoDocumento") String tipoDocumento,
+            @RequestParam(value = "solicitudId", required = false) Integer solicitudId,
+            @RequestParam(value = "fichajeId", required = false) Integer fichajeId,
+            Authentication auth) {
+        try {
+            if (archivo.isEmpty())
+                return ResponseEntity.badRequest().body("Archivo vacío");
+            if (!"application/pdf".equals(archivo.getContentType()))
+                return ResponseEntity.badRequest().body("Solo se permiten PDFs");
+            if (archivo.getSize() > 5 * 1024 * 1024)
+                return ResponseEntity.badRequest().body("Máximo 5MB");
+
+            Justificante j = fichajeServices.guardarJustificante(
+                    archivo, tipoDocumento, solicitudId, fichajeId, auth.getName());
+            return ResponseEntity.ok(Map.of("id", j.getId(), "mensaje", "Subido correctamente"));
+        } catch (Exception e) {
+            return ResponseEntity.status(500).body("Error al subir: " + e.getMessage());
+        }
+    }
+
+    @GetMapping("/justificantes/{id}/ver")
+    public ResponseEntity<?> verJustificante(@PathVariable Integer id, Authentication auth) {
+        try {
+            Resource resource = fichajeServices.cargarJustificante(id);
+            return ResponseEntity.ok()
+                    .contentType(MediaType.APPLICATION_PDF)
+                    .header(HttpHeaders.CONTENT_DISPOSITION, "inline; filename=\"justificante.pdf\"")
+                    .body(resource);
+        } catch (Exception e) {
+            return ResponseEntity.status(404).body("Archivo no encontrado");
+        }
+    }
+
+    @GetMapping("/justificantes/pendientes")
+    public ResponseEntity<?> getJustificantesPendientes() {
+        try {
+            return ResponseEntity.ok(fichajeServices.getJustificantesPendientes());
+        } catch (Exception e) {
+            return ResponseEntity.status(500).body("Error al obtener justificantes");
+        }
+    }
+
+    //corregir path ver la forma de saber si es admin o no para mostrar unos u otros justificantes
+    @GetMapping("/justificantes/miJustificantes")
+    public ResponseEntity<?> getMisJustificantes(Authentication auth) {
+        try {
+            return ResponseEntity.ok(fichajeServices.getMisJustificantes(auth.getName()));
+        } catch (Exception e) {
+            return ResponseEntity.status(500).body("Error al obtener justificantes");
+        }
+    }
+
+    @PutMapping("/justificantes/{id}/revisar")
+    public ResponseEntity<?> revisarJustificante(
+            @PathVariable Integer id,
+            @RequestBody Map<String, String> body,
+            Authentication auth) {
+        try {
+            //pendiente a revisar si dejamos como null o no
+            Justificante j = fichajeServices.revisarJustificante(id, null, null, null);
+            return ResponseEntity.ok(j);
+        } catch (Exception e) {
+            return ResponseEntity.status(500).body("Error al revisar: " + e.getMessage());
+        }
+    }
+
     @GetMapping("/fichajes/abierto")
     public ResponseEntity<?> getFichajeAbierto(@RequestParam Integer usuarioId, @RequestParam String fecha) {
         try {
             Fichajes abierto = fichajeServices.findAbierto(usuarioId, java.time.LocalDate.parse(fecha));
             if (abierto != null) {
-                // Devuelve el DTO del fichaje abierto
                 return ResponseEntity.ok(fichajeServices.getAllFichajesDTO().stream()
-                    .filter(dto -> dto.getId() == abierto.getId())
-                    .findFirst().orElse(null));
+                        .filter(dto -> dto.getId() == abierto.getId())
+                        .findFirst().orElse(null));
             } else {
                 return ResponseEntity.ok(null);
             }

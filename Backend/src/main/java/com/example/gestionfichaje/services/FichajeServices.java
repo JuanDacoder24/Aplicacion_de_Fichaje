@@ -2,32 +2,46 @@ package com.example.gestionfichaje.services;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
+import java.net.MalformedURLException;
+import java.nio.file.Files;
+import java.nio.file.Paths;
+import java.nio.file.StandardCopyOption;
 import java.time.Duration;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.io.UrlResource;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
 import com.example.gestionfichaje.dto.FichajeDTO;
 import com.example.gestionfichaje.dto.HorarioDTO;
 import com.example.gestionfichaje.entity.DiaSemana;
+import com.example.gestionfichaje.entity.EstadoJustificante;
 import com.example.gestionfichaje.entity.Fichajes;
 import com.example.gestionfichaje.entity.Horarios;
+import com.example.gestionfichaje.entity.Justificante;
 import com.example.gestionfichaje.entity.Solicitudes;
 import com.example.gestionfichaje.entity.Usuarios;
 import com.example.gestionfichaje.repository.FichajesRepository;
 import com.example.gestionfichaje.repository.HorariosRepository;
+import com.example.gestionfichaje.repository.JustificanteRepository;
 import com.example.gestionfichaje.repository.SolicitudesRepository;
 import com.example.gestionfichaje.repository.UsuariosRepository;
 
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.core.io.Resource;
+import java.io.IOException;
+import java.nio.file.Path;
 
 @Service
 public class FichajeServices {
@@ -66,62 +80,61 @@ public class FichajeServices {
 
     public Horarios crearHorario(HorarioDTO dto) {
 
-    Usuarios usuario = usuariosRepository.findById(dto.usuarioId)
-        .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
+        Usuarios usuario = usuariosRepository.findById(dto.usuarioId)
+                .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
 
-    Horarios h = new Horarios();
-    h.setUsuario(usuario);
-    h.setDiaSemana(DiaSemana.valueOf(dto.diaSemana));
-    h.setHoraInicio(LocalTime.parse(dto.horaInicio));
-    h.setHoraFin(LocalTime.parse(dto.horaFin));
+        Horarios h = new Horarios();
+        h.setUsuario(usuario);
+        h.setDiaSemana(DiaSemana.valueOf(dto.diaSemana));
+        h.setHoraInicio(LocalTime.parse(dto.horaInicio));
+        h.setHoraFin(LocalTime.parse(dto.horaFin));
 
-    return horariosRepository.save(h);
-}
+        return horariosRepository.save(h);
+    }
 
-public List<Fichajes> getByRango(String inicio, String fin) {
+    public List<Fichajes> getByRango(String inicio, String fin) {
 
-    LocalDate fechaInicio = LocalDate.parse(inicio);
-    LocalDate fechaFin = LocalDate.parse(fin);
+        LocalDate fechaInicio = LocalDate.parse(inicio);
+        LocalDate fechaFin = LocalDate.parse(fin);
 
-    return fichajesRepository.findByFechaBetween(fechaInicio, fechaFin);
-}
+        return fichajesRepository.findByFechaBetween(fechaInicio, fechaFin);
+    }
 
     public Fichajes registrarEntrada(FichajeDTO req) {
-    // Convertir String a LocalDate correctamente
-    LocalDate fecha = LocalDate.parse(req.getFecha());
-    
-    Fichajes abierto = findAbierto(req.getUsuarioId(), fecha);
-    if (abierto != null) {
-        throw new RuntimeException("Ya tienes entrada abierta para " + req.getFecha());
+        // Convertir String a LocalDate correctamente
+        LocalDate fecha = LocalDate.parse(req.getFecha());
+
+        Fichajes abierto = findAbierto(req.getUsuarioId(), fecha);
+        if (abierto != null) {
+            throw new RuntimeException("Ya tienes entrada abierta para " + req.getFecha());
+        }
+
+        Usuarios usuario = usuariosRepository.findById(req.getUsuarioId())
+                .orElseThrow(() -> new RuntimeException("Usuario no encontrado: " + req.getUsuarioId()));
+
+        Fichajes fichaje = new Fichajes();
+        fichaje.setUsuario(usuario);
+        fichaje.setFecha(fecha);
+        fichaje.setHoraEntrada(LocalDateTime.now());
+        fichaje.setDescansoMinutos(req.getDescansoMinutos());
+
+        return saveFichaje(fichaje);
     }
 
-    Usuarios usuario = usuariosRepository.findById(req.getUsuarioId())
-            .orElseThrow(() -> new RuntimeException("Usuario no encontrado: " + req.getUsuarioId()));
+    public Fichajes registrarSalida(FichajeDTO req) {
+        LocalDate fecha = LocalDate.parse(req.getFecha());
+        Fichajes abierto = findAbierto(req.getUsuarioId(), fecha);
 
-    Fichajes fichaje = new Fichajes();
-    fichaje.setUsuario(usuario);
-    fichaje.setFecha(fecha);  
-    fichaje.setHoraEntrada(LocalDateTime.now());
-    fichaje.setDescansoMinutos(req.getDescansoMinutos());
+        if (abierto == null) {
+            throw new RuntimeException("No tienes entrada abierta para cerrar");
+        }
 
-    return saveFichaje(fichaje);
-}
+        abierto.setHoraSalida(LocalDateTime.now());
+        calcularHorasTrabajadas(abierto);
 
-public Fichajes registrarSalida(FichajeDTO req) {
-    LocalDate fecha = LocalDate.parse(req.getFecha());
-    Fichajes abierto = findAbierto(req.getUsuarioId(), fecha);
-
-    if (abierto == null) {
-        throw new RuntimeException("No tienes entrada abierta para cerrar");
+        return saveFichaje(abierto);
     }
 
-    abierto.setHoraSalida(LocalDateTime.now());
-    calcularHorasTrabajadas(abierto);
-
-    return saveFichaje(abierto);
-}
-
-    // Hacer público para el controlador
     public Fichajes findAbierto(Integer usuarioId, LocalDate fecha) {
         Optional<Fichajes> result = fichajesRepository.findByUsuarioIdAndFechaAndHoraSalidaIsNull(usuarioId, fecha);
         return result.orElse(null);
@@ -133,29 +146,24 @@ public Fichajes registrarSalida(FichajeDTO req) {
         BigDecimal horas = BigDecimal.valueOf(total.toMinutes())
                 .divide(BigDecimal.valueOf(60), 2, RoundingMode.HALF_UP);
 
-        // Restar descanso
         if (fichaje.getDescansoMinutos() != null && fichaje.getDescansoMinutos() > 0) {
             BigDecimal descuento = BigDecimal.valueOf(fichaje.getDescansoMinutos())
                     .divide(BigDecimal.valueOf(60), 2, RoundingMode.HALF_UP);
             horas = horas.subtract(descuento);
         }
-        // poner horas trabajadas en el fichaje y en la base de datos
         fichaje.setHorasTrabajadas(horas.intValue());
     }
 
-    // Obtener todos los fichajes con paginacion
     public Page<Fichajes> getAllFichajes(int page, int size) {
         Pageable pageable = PageRequest.of(page, size);
         return fichajesRepository.findAll(pageable);
     }
 
-    // Buscar fichajes por usuario
     public Page<Fichajes> getFichajesByUsuario(Integer usuarioId, int page, int size) {
         Pageable pageable = PageRequest.of(page, size);
         return fichajesRepository.findByUsuarioId(usuarioId, pageable);
     }
 
-    // CRUD para Fichajes
     public Fichajes getFichajeById(Integer id) {
         return fichajesRepository.findById(id).orElse(null);
     }
@@ -164,7 +172,6 @@ public Fichajes registrarSalida(FichajeDTO req) {
         fichajesRepository.deleteById(id);
     }
 
-    // CRUD para Horarios
     public List<Horarios> getAllHorarios() {
         return horariosRepository.findAll();
     }
@@ -177,7 +184,6 @@ public Fichajes registrarSalida(FichajeDTO req) {
         horariosRepository.deleteById(id);
     }
 
-    // CRUD para Solicitudes
     public List<Solicitudes> getAllSolicitudes() {
         return solicitudesRepository.findAll();
     }
@@ -190,7 +196,6 @@ public Fichajes registrarSalida(FichajeDTO req) {
         solicitudesRepository.deleteById(id);
     }
 
-    // Paginación para Solicitudes
     public List<Solicitudes> getAllSolicitudes(int page, int size) {
         Pageable pageable = PageRequest.of(page, size);
         return solicitudesRepository.findAll(pageable).getContent();
@@ -200,7 +205,6 @@ public Fichajes registrarSalida(FichajeDTO req) {
         return solicitudesRepository.findById(id).orElse(null);
     }
 
-    // CRUD para Usuarios
     public List<Usuarios> getAllUsuarios() {
         return usuariosRepository.findAll();
     }
@@ -219,6 +223,85 @@ public Fichajes registrarSalida(FichajeDTO req) {
 
     public List<FichajeDTO> getAllFichajesDTO() {
         return fichajesRepository.findAll().stream().map(this::toDTO).collect(Collectors.toList());
+    }
+
+    @Value("${app.upload.directorio:./uploads/justificantes}")
+    private String directorioUpload;
+
+    @Autowired
+    private JustificanteRepository justificanteRepository;
+
+    public Justificante guardarJustificante(MultipartFile archivo, String tipoDocumento,
+            Integer solicitudId, Integer fichajeId,
+            String emailUsuario) {
+        try {
+            Path dirPath = Paths.get(directorioUpload);
+            Files.createDirectories(dirPath);
+
+            String nombreUnico = UUID.randomUUID() + "_" + archivo.getOriginalFilename();
+            Path rutaFinal = dirPath.resolve(nombreUnico);
+            Files.copy(archivo.getInputStream(), rutaFinal, StandardCopyOption.REPLACE_EXISTING);
+
+            Usuarios usuario = usuariosRepository.findByEmail(emailUsuario)
+                    .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
+
+            Justificante j = new Justificante();
+            j.setUsuario(usuario);
+            j.setNombreArchivo(archivo.getOriginalFilename());
+            j.setTipoDocumento(tipoDocumento);
+            j.setRutaArchivo(rutaFinal.toString());
+            j.setEstado(EstadoJustificante.PENDIENTE);
+
+            if (solicitudId != null) {
+                solicitudesRepository.findById(solicitudId).ifPresent(j::setSolicitud);
+            }
+            if (fichajeId != null) {
+                fichajesRepository.findById(fichajeId).ifPresent(j::setFichaje);
+            }
+
+            return justificanteRepository.save(j);
+
+        } catch (IOException e) {
+            throw new RuntimeException("Error al guardar el archivo: " + e.getMessage());
+        }
+    }
+
+    public Resource cargarJustificante(Integer id) {
+        try {
+            Justificante j = justificanteRepository.findById(id)
+                    .orElseThrow(() -> new RuntimeException("Justificante no encontrado"));
+            Path ruta = Paths.get(j.getRutaArchivo());
+            Resource resource = new UrlResource(ruta.toUri());
+            if (!resource.exists() || !resource.isReadable())
+                throw new RuntimeException("Archivo no encontrado en disco");
+            return resource;
+        } catch (MalformedURLException e) {
+            throw new RuntimeException("URL inválida: " + e.getMessage());
+        }
+    }
+
+    public List<Justificante> getJustificantesPendientes() {
+        return justificanteRepository.findByEstado(EstadoJustificante.PENDIENTE);
+    }
+
+    public List<Justificante> getMisJustificantes(String email) {
+        return justificanteRepository.findByUsuarioEmail(email);
+    }
+
+    public Justificante revisarJustificante(Integer id, EstadoJustificante estado,
+            String comentario, String emailAdmin) {
+        Justificante j = justificanteRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("No encontrado"));
+
+        Usuarios admin = usuariosRepository.findByEmail(emailAdmin)
+                .orElseThrow(() -> new RuntimeException("Admin no encontrado"));
+
+        j.setEstado(estado);
+        j.setComentarioAdmin(comentario);
+        j.setFechaRevision(LocalDateTime.now());
+        j.setRevisadoPor(admin);
+
+        return justificanteRepository.save(j);
     }
 
     // Mapeo de entidad Fichajes a FichajeDTO
@@ -240,5 +323,4 @@ public Fichajes registrarSalida(FichajeDTO req) {
         return dto;
     }
 
-    
 }

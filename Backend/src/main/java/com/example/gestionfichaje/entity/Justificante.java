@@ -33,7 +33,7 @@ public class Justificante {
     private Solicitudes solicitud; 
 
     private String nombreArchivo;
-    private String tipoDocumento; // BAJA_MEDICA, CITA_MEDICA, etc.
+    private String tipoDocumento; 
     private String rutaArchivo;
 
     @Enumerated(EnumType.STRING)
