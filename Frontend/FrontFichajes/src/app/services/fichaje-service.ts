@@ -113,6 +113,13 @@ export class FichajeService {
     ));
   }
 
+  async obtenerFichajesUsuario(): Promise<IFichajes[]> {
+    const usuarioId = this.authService.id();
+    if (!usuarioId) return [];
+    const response = await this.getFichajesByUsuario(usuarioId);
+    return response.content || response;
+  }
+
   // HORARIOS 
 
   async getHorarios(): Promise<IHorarios[]> {

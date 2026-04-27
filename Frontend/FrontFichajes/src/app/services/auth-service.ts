@@ -109,4 +109,14 @@ export class AuthService {
   isEmpleado(): boolean {
     return this.hasRole('empleado');
   }
+
+  async getCurrentUser(): Promise<IUsuario | null> {
+    const id = this.idSignal();
+    if (!id) return null;
+    return await firstValueFrom(
+      this.httpClient.get<IUsuario>(`${this.usuariosUrl}/${id}`, {
+        headers: this.getAuthHeaders(),
+      })
+    );
+  }
 }

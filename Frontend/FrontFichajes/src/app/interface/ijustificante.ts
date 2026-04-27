@@ -4,6 +4,7 @@ export interface IJustificante {
     usuario_id: number;
     fichaje_id?: number | null;
     solicitud_id?: number | null;
+    solicitudId?: number;
     nombre_archivo: string;
     tipo_documento: string;
     ruta_archivo: string;

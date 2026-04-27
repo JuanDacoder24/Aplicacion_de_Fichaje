@@ -284,6 +284,10 @@ public class FichajeServices {
         return justificanteRepository.findByEstado(EstadoJustificante.PENDIENTE);
     }
 
+    public List<Justificante> getAllJustificantes() {
+        return justificanteRepository.findAll();
+    }
+
     public List<Justificante> getMisJustificantes(String email) {
         return justificanteRepository.findByUsuarioEmail(email);
     }

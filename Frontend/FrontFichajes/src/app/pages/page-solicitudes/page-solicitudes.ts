@@ -1,67 +1,411 @@
-import { Component, inject, signal } from '@angular/core'
-import { FichajeService } from '../../services/fichaje-service'
-import { AuthService } from '../../services/auth-service'
-import { EstadisticasSolicitudesDTO, FiltroSolicitudesDTO, ISolicitudes, RevisionSolicitudDTO } from '../../interface/isolicitudes'
-import { CommonModule } from '@angular/common'
-import { HttpClient, HttpParams } from '@angular/common/http'
-import { firstValueFrom } from 'rxjs'
-import { IJustificante } from '../../interface/ijustificante'
+import { Component, inject, signal, computed, OnInit, OnDestroy, AfterViewInit } from '@angular/core';
+import { CommonModule } from '@angular/common';
+import { FormsModule } from '@angular/forms';
+import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
+import { SolicitudService } from '../../services/solicitud-service';
+import { AuthService } from '../../services/auth-service';
+import { FichajeService } from '../../services/fichaje-service';
+import { ISolicitudes, FiltroSolicitudesDTO } from '../../interface/isolicitudes';
+import { IJustificante } from '../../interface/ijustificante';
+import { IUsuario } from '../../interface/iusuario';
+import { Rol } from '../../enum/rol';
+import { IFichajes } from '../../interface/ifichajes';
+
+declare var bootstrap: any;
 
 @Component({
   selector: 'app-page-solicitudes',
-  imports: [CommonModule],
+  standalone: true,
+  imports: [CommonModule, FormsModule],
   templateUrl: './page-solicitudes.html',
-  styleUrl: './page-solicitudes.css',
+  styleUrls: ['./page-solicitudes.css']
 })
-export class PageSolicitudes {
-
-  esAdmin = false
-  archivo: File | null = null
-  filtroEstado = 'TODAS'
-  comentarioAdmin = ''
-
-  private http = inject(HttpClient)
-
-  private apiUrl = '/api/solicitudes'
-  private justificantesUrl = '/api/justificantes'
-
-  private authService = inject(AuthService)
-  private fichajeService = inject(FichajeService)
-
-  solicitudes = signal<ISolicitudes[]>([])
-
-  nuevaSolicitud = {
-    tipoDocumento: 'JUSTIFICANTE_FALTA',
-    fichajeId: null as number | null,
-    motivo: ''
-  }
-
+export class PageSolicitudes implements OnInit, OnDestroy {
+  
+  // ──────────────── Services ──────────────────────────────────
+  private solicitudService = inject(SolicitudService);
+  private authService = inject(AuthService);
+  private fichajeService = inject(FichajeService);
+  private sanitizer = inject(DomSanitizer);
+  
+  // ──────────────── State Signals ─────────────────────────────
+  cargando = signal<boolean>(false);
+  enviando = signal<boolean>(false);
+  error = signal<string>('');
+  exito = signal<string>('');
+  
+  // Datos principales
+  solicitudes = signal<ISolicitudes[]>([]);
+  justificantes = signal<IJustificante[]>([]);
+  fichajes = signal<IFichajes[]>([]);
+  usuarioActual = signal<IUsuario | null>(null);
+  
+  // UI State
+  esAdmin = signal<boolean>(false);
+  filtroEstado = signal<string>('TODAS');
+  
+  // Comentarios admin por solicitud (key: solicitudId)
+  comentariosAdmin = signal<Record<number, string>>({});
+  
+  // Nueva solicitud
+  nuevaSolicitud = signal({
+    tipoDocumento: 'OTROS',
+    motivo: '',
+    fichajeId: null as number | null
+  });
+  
+  // Archivo
+  archivoSeleccionado: File | null = null;
+  nombreArchivo = signal<string>('');
+  
+  // Modal PDF
+  pdfUrl = signal<SafeResourceUrl | null>(null);
+  private modalInstance: any = null;
+  
+  // ──────────────── Computed Signals ──────────────────────────
+  solicitudesFiltradas = computed(() => {
+    const filtro = this.filtroEstado();
+    const lista = this.solicitudes();
+    
+    if (filtro === 'TODAS') return lista;
+    return lista.filter(s => s.estado === filtro);
+  });
+  
+  totalPendientes = computed(() => {
+    return this.solicitudes().filter(s => s.estado === 'PENDIENTE').length;
+  });
+  
+  totalResueltas = computed(() => {
+    return this.solicitudes().filter(s => s.estado === 'APROBADA' || s.estado === 'RECHAZADA').length;
+  });
+  
+  // ──────────────── Opciones para selects ─────────────────────
   tiposDocumento = [
-    { value: 'JUSTIFICANTE_FALTA', label: 'Justificante de falta' },
-    { value: 'BAJA_MEDICA',        label: 'Baja médica' },
-    { value: 'CITA_MEDICA',        label: 'Cita médica' },
-    { value: 'MOD_FICHAJE',        label: 'Modificación fichaje' },
-    { value: 'OTROS',              label: 'Otros' }
-  ]
-
-  async ngOnInit() {
-  const id = this.authService.id()
-
-  if (id) {
+    { value: 'DNI', label: 'DNI' },
+    { value: 'NIE', label: 'NIE' },
+    { value: 'PASAPORTE', label: 'Pasaporte' },
+    { value: 'OTROS', label: 'Otros' }
+  ];
+  
+  estadosFiltro = [
+    { value: 'TODAS', label: 'Todas' },
+    { value: 'PENDIENTE', label: 'Pendientes' },
+    { value: 'APROBADA', label: 'Aprobadas' },
+    { value: 'RECHAZADA', label: 'Rechazadas' }
+  ];
+  
+  // ──────────────── Lifecycle Hooks ───────────────────────────
+  
+  ngOnInit(): void {
+    this.inicializarComponente();
+  }
+  
+  ngOnDestroy(): void {
+    this.cerrarModal();
+  }
+  
+  // ──────────────── Inicialización ────────────────────────────
+  
+  async inicializarComponente(): Promise<void> {
     try {
-      const data = await this.fichajeService.getSolicitudes()
-      this.solicitudes.set(data)
-    } catch (e) {
-      console.error('Error al cargar las solicitudes: ', e)
+      this.cargando.set(true);
+      this.error.set('');
+      
+      // Obtener usuario actual
+      const user = await this.authService.getCurrentUser();
+      this.usuarioActual.set(user);
+      this.esAdmin.set(user?.rol === Rol.ADMIN);
+      
+      // Cargar datos según rol
+      await this.cargarSolicitudes();
+      
+      if (this.esAdmin()) {
+        await this.cargarJustificantes();
+      } else {
+        await this.cargarFichajes();
+      }
+      
+    } catch (err) {
+      console.error('Error al inicializar:', err);
+      this.error.set('Error al cargar los datos iniciales');
+    } finally {
+      this.cargando.set(false);
     }
   }
-}
-
   
+  // ──────────────── Carga de datos ────────────────────────────
   
-
+  async cargarSolicitudes(): Promise<void> {
+    try {
+      let data: ISolicitudes[];
+      
+      if (this.esAdmin()) {
+        const filtro: FiltroSolicitudesDTO = {};
+        data = await this.solicitudService.obtenerSolicitudes();
+      } else {
+        // Para empleados normales, necesitas un método en el servicio
+        // Asumiendo que obtenerSolicitudes sin filtro devuelve todas las del usuario actual
+        data = await this.solicitudService.obtenerSolicitudes();
+      }
+      
+      this.solicitudes.set(data);
+      
+    } catch (err) {
+      console.error('Error cargando solicitudes:', err);
+      throw err;
+    }
+  }
   
+  async cargarJustificantes(): Promise<void> {
+    try {
+      const data = await this.solicitudService.obtenerJustificantes();
+      this.justificantes.set(data);
+    } catch (err) {
+      console.error('Error cargando justificantes:', err);
+    }
+  }
   
-
+  async cargarFichajes(): Promise<void> {
+    try {
+      // Asumiendo que tienes un método en fichajeService para obtener fichajes del usuario
+      const data = await this.fichajeService.obtenerFichajesUsuario();
+      this.fichajes.set(data);
+    } catch (err) {
+      console.error('Error cargando fichajes:', err);
+    }
+  }
   
+  // ──────────────── Gestión de archivos ───────────────────────
+  
+  onFileChange(event: Event): void {
+    const input = event.target as HTMLInputElement;
+    
+    if (input.files && input.files.length > 0) {
+      const file = input.files[0];
+      
+      // Validar tipo
+      if (file.type !== 'application/pdf') {
+        this.error.set('Solo se permiten archivos PDF');
+        this.limpiarArchivo();
+        return;
+      }
+      
+      // Validar tamaño (5MB)
+      if (file.size > 5 * 1024 * 1024) {
+        this.error.set('El archivo no puede superar los 5MB');
+        this.limpiarArchivo();
+        return;
+      }
+      
+      this.archivoSeleccionado = file;
+      this.nombreArchivo.set(file.name);
+      this.error.set('');
+    }
+  }
+  
+  limpiarArchivo(): void {
+    this.archivoSeleccionado = null;
+    this.nombreArchivo.set('');
+  }
+  
+  // ──────────────── Enviar solicitud ──────────────────────────
+  
+  async enviarSolicitud(): Promise<void> {
+    const solicitud = this.nuevaSolicitud();
+    
+    if (!solicitud.motivo.trim()) {
+      this.error.set('El motivo es obligatorio');
+      return;
+    }
+    
+    try {
+      this.enviando.set(true);
+      this.error.set('');
+      
+      let solicitudCreada: ISolicitudes;
+      
+      // Crear solicitud primero
+      solicitudCreada = await this.solicitudService.crearSolicitud(
+        solicitud.motivo,
+        solicitud.fichajeId || undefined
+      );
+      
+      // Si hay archivo, subir justificante asociado a la solicitud
+      if (this.archivoSeleccionado && solicitudCreada.id) {
+        await this.solicitudService.subirJustificante(
+          this.archivoSeleccionado,
+          solicitud.tipoDocumento,
+          solicitudCreada.id,
+          solicitud.fichajeId || undefined
+        );
+      }
+      
+      // Limpiar formulario
+      this.nuevaSolicitud.set({
+        tipoDocumento: 'OTROS',
+        motivo: '',
+        fichajeId: null
+      });
+      this.limpiarArchivo();
+      
+      this.exito.set('Solicitud enviada correctamente');
+      
+      // Recargar listado
+      await this.cargarSolicitudes();
+      
+      if (this.esAdmin()) {
+        await this.cargarJustificantes();
+      }
+      
+      // Auto-limpiar mensaje de éxito
+      setTimeout(() => {
+        if (this.exito() === 'Solicitud enviada correctamente') {
+          this.exito.set('');
+        }
+      }, 3000);
+      
+    } catch (err: any) {
+      console.error('Error enviando solicitud:', err);
+      this.error.set(err.message || 'Error al enviar la solicitud');
+    } finally {
+      this.enviando.set(false);
+    }
+  }
+  
+  // ──────────────── Métodos Admin ─────────────────────────────
+  
+  async aprobarSolicitud(solicitud: ISolicitudes): Promise<void> {
+    const comentario = this.comentariosAdmin()[solicitud.id] || '';
+    
+    try {
+      this.cargando.set(true);
+      
+      await this.solicitudService.revisarSolicitud(
+        solicitud.id,
+        'APROBADA',
+        comentario
+      );
+      
+      this.exito.set('Solicitud aprobada correctamente');
+      
+      // Limpiar comentario
+      const nuevosComentarios = { ...this.comentariosAdmin() };
+      delete nuevosComentarios[solicitud.id];
+      this.comentariosAdmin.set(nuevosComentarios);
+      
+      // Recargar datos
+      await this.cargarSolicitudes();
+      await this.cargarJustificantes();
+      
+      setTimeout(() => {
+        if (this.exito() === 'Solicitud aprobada correctamente') {
+          this.exito.set('');
+        }
+      }, 3000);
+      
+    } catch (err: any) {
+      console.error('Error aprobando solicitud:', err);
+      this.error.set(err.message || 'Error al aprobar la solicitud');
+    } finally {
+      this.cargando.set(false);
+    }
+  }
+  
+  async rechazarSolicitud(solicitud: ISolicitudes): Promise<void> {
+    const comentario = this.comentariosAdmin()[solicitud.id] || '';
+    
+    try {
+      this.cargando.set(true);
+      
+      await this.solicitudService.revisarSolicitud(
+        solicitud.id,
+        'RECHAZADA',
+        comentario
+      );
+      
+      this.exito.set('Solicitud rechazada');
+      
+      // Limpiar comentario
+      const nuevosComentarios = { ...this.comentariosAdmin() };
+      delete nuevosComentarios[solicitud.id];
+      this.comentariosAdmin.set(nuevosComentarios);
+      
+      // Recargar datos
+      await this.cargarSolicitudes();
+      await this.cargarJustificantes();
+      
+      setTimeout(() => {
+        if (this.exito() === 'Solicitud rechazada') {
+          this.exito.set('');
+        }
+      }, 3000);
+      
+    } catch (err: any) {
+      console.error('Error rechazando solicitud:', err);
+      this.error.set(err.message || 'Error al rechazar la solicitud');
+    } finally {
+      this.cargando.set(false);
+    }
+  }
+  
+  // ──────────────── PDF Modal ─────────────────────────────────
+  
+  abrirModalPdf(justificanteId: number): void {
+    try {
+      const url = this.solicitudService.verPdf(justificanteId);
+      this.pdfUrl.set(this.sanitizer.bypassSecurityTrustResourceUrl(url));
+      
+      const modalElement = document.getElementById('modalPdf');
+      if (modalElement && typeof bootstrap !== 'undefined') {
+        this.modalInstance = new bootstrap.Modal(modalElement);
+        this.modalInstance.show();
+      } else {
+        // Fallback: abrir en nueva ventana si Bootstrap no está disponible
+        window.open(url, '_blank');
+      }
+    } catch (err) {
+      console.error('Error abriendo PDF:', err);
+      this.error.set('Error al abrir el PDF');
+    }
+  }
+  
+  cerrarModal(): void {
+    if (this.modalInstance) {
+      this.modalInstance.hide();
+      this.modalInstance = null;
+    }
+    this.pdfUrl.set(null);
+  }
+  
+  // ──────────────── Métodos auxiliares ────────────────────────
+  
+  getJustificanteBySolicitud(solicitudId: number): IJustificante | undefined {
+    return this.justificantes().find(j => j.solicitudId === solicitudId || j.solicitud_id === solicitudId);
+  }
+  
+  getBadgeClass(estado: string): string {
+    const clases = {
+      'PENDIENTE': 'badge bg-warning text-dark',
+      'APROBADA': 'badge bg-success',
+      'RECHAZADA': 'badge bg-danger'
+    };
+    return clases[estado as keyof typeof clases] || 'badge bg-secondary';
+  }
+  
+  getNombreUsuario(usuario?: IUsuario): string {
+    if (!usuario) return 'Usuario';
+    return usuario.nombre || usuario.email || 'Usuario';
+  }
+  
+  formatearFecha(fecha: Date | string): string {
+    if (!fecha) return '';
+    const date = new Date(fecha);
+    return date.toLocaleDateString('es-ES', {
+      day: '2-digit',
+      month: '2-digit',
+      year: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit'
+    });
+  }
 }

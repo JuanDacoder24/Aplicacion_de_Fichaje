@@ -10,5 +10,6 @@ export interface IFichajes {
     descansoMinutos: number
     horasTrabajadas: number
     comentario: string
+    tipo?: string
 
 }

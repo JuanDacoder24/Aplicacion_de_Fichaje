@@ -10,6 +10,7 @@ export interface ISolicitudes {
     estado: 'PENDIENTE' | 'APROBADA' | 'RECHAZADA'
     fechaSolicitud: Date
     justificante?: IJustificante  
+    tipoDocumento?: string
 }
 
 export interface CrearSolicitudDTO {
