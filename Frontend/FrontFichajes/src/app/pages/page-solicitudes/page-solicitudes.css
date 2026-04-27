@@ -91,8 +91,7 @@
   background: rgba(255,255,255,0.04);
   border: 1px solid rgba(255,255,255,0.08);
   border-radius: 20px;
-  box-shadow: 0 8px 32px rgba(0,0,0,0.3),
-              0 0 0 1px rgba(46,134,193,0.08) inset;
+  box-shadow: 0 4px 16px rgba(39,174,96,0.3);
   overflow: hidden;
 }
 
@@ -151,7 +150,6 @@
   background: rgba(255,255,255,0.07);
 }
 
-/* ── Drop zone PDF ── */
 .drop-zone {
   border: 1.5px dashed rgba(255,255,255,0.15);
   border-radius: 12px;
@@ -170,7 +168,7 @@
 .drop-zone .drop-text { font-size: 0.82rem; color: #4a7a99; }
 .drop-zone .file-ok   { font-size: 0.88rem; color: #2ecc71; }
 
-/* ── Botón principal ── */
+
 .btn-glass-primary {
   display: inline-flex;
   align-items: center;
@@ -194,7 +192,6 @@
 
 .btn-glass-primary:disabled { opacity: 0.5; cursor: not-allowed; }
 
-/* ── Botones secundarios ── */
 .btn-glass {
   display: inline-flex;
   align-items: center;

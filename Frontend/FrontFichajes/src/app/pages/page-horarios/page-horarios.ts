@@ -44,19 +44,17 @@ export class PageHorarios implements OnInit {
 
   async guardar() {
   try {
-    // Formatear los datos para el backend
     const horarioParaEnviar = {
-      usuarioId: Number(this.nuevoHorario.usuarioId), // Asegurar que sea número
+      usuarioId: Number(this.nuevoHorario.usuarioId),
       diaSemana: this.nuevoHorario.diaSemana,
-      horaInicio: this.nuevoHorario.horaInicio + ':00', // Añadir segundos si es necesario
+      horaInicio: this.nuevoHorario.horaInicio + ':00', 
       horaFin: this.nuevoHorario.horaFin + ':00'
     };
     
     console.log('Enviando horario:', horarioParaEnviar);
     await this.fichajeService.createHorario(horarioParaEnviar);
-    await this.cargarHorarios(); // Recargar después de guardar
+    await this.cargarHorarios(); 
     
-    // Resetear formulario
     this.nuevoHorario = {
       usuarioId: '',
       diaSemana: '',

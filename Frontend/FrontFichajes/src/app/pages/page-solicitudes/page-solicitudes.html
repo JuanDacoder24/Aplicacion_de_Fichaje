@@ -1,4 +1,3 @@
-<!-- Orbs de fondo -->
 <div class="hero-bg">
   <div class="orb orb-1"></div>
   <div class="orb orb-2"></div>
@@ -6,14 +5,12 @@
 
 <div class="page-content">
 
-  <!-- Título -->
   <p class="page-title">Solicitudes</p>
   <p class="page-subtitle">
-    {{ esAdmin() ? 'Gestiona y resuelve las solicitudes de los empleados'
+    {{ esAdmin() ? 'Gestiona solicitudes y crea las tuyas propias'
                  : 'Envía y consulta el estado de tus solicitudes' }}
   </p>
 
-  <!-- Alertas -->
   @if (error()) {
     <div class="alert-glass danger">
       <span><i class="bi bi-exclamation-triangle-fill me-2"></i>{{ error() }}</span>
@@ -27,7 +24,6 @@
     </div>
   }
 
-  <!-- Spinner -->
   @if (cargando()) {
     <div class="loading-block">
       <div class="spinner-lg"></div>
@@ -37,149 +33,145 @@
 
   @if (!cargando()) {
 
-    <!-- ══════════════════════════════════════════════════
-         EMPLEADO
-    ══════════════════════════════════════════════════ -->
-    @if (!esAdmin()) {
-      <div class="row g-4">
+    <!-- ══════════════ FILA SUPERIOR: Formulario (ambos roles) ══════════════ -->
+    <div class="row g-4 mb-4">
 
-        <!-- Formulario -->
-        <div class="col-lg-5">
-          <div class="card-glass">
-            <div class="card-glass-header">
-              <h5><i class="bi bi-plus-circle me-2" style="color:#2ecc71"></i>Nueva solicitud</h5>
-            </div>
-            <div class="card-glass-body d-flex flex-column gap-3">
-
-              <div>
-                <label class="form-label-glass">Tipo de documento</label>
-                <select class="form-select-glass" [(ngModel)]="nuevaSolicitud().tipoDocumento">
-                  @for (tipo of tiposDocumento; track tipo.value) {
-                    <option [value]="tipo.value">{{ tipo.label }}</option>
-                  }
-                </select>
-              </div>
-
-              <div>
-                <label class="form-label-glass">
-                  Fichaje relacionado
-                  <span style="color:#4a7a99; text-transform:none; font-weight:400">(opcional)</span>
-                </label>
-                <select class="form-select-glass" [(ngModel)]="nuevaSolicitud().fichajeId">
-                  <option [ngValue]="null">-- Ninguno --</option>
-                  @for (fichaje of fichajes(); track fichaje.id) {
-                    <option [ngValue]="fichaje.id">
-                      {{ fichaje.fecha | date:'dd/MM/yyyy' }}
-                    </option>
-                  }
-                </select>
-              </div>
-
-              <div>
-                <label class="form-label-glass">
-                  Motivo <span style="color:#e74c3c">*</span>
-                </label>
-                <textarea
-                  class="form-control-glass"
-                  rows="4"
-                  [(ngModel)]="nuevaSolicitud().motivo"
-                  placeholder="Describe el motivo de tu solicitud...">
-                </textarea>
-              </div>
-
-              <div>
-                <label class="form-label-glass">
-                  Justificante PDF
-                  <span style="color:#4a7a99; text-transform:none; font-weight:400">(opcional, máx. 5MB)</span>
-                </label>
-                <div class="drop-zone" (click)="fileInput.click()">
-                  @if (!nombreArchivo()) {
-                    <div class="drop-icon"><i class="bi bi-cloud-upload"></i></div>
-                    <div class="drop-text">Haz clic para seleccionar un PDF</div>
-                    <div class="drop-text" style="margin-top:4px">o arrastra y suelta aquí</div>
-                  }
-                  @if (nombreArchivo()) {
-                    <div class="file-ok">
-                      <i class="bi bi-file-pdf-fill me-2"></i>{{ nombreArchivo() }}
-                      <br>
-                      <button class="btn-glass mt-2"
-                              style="font-size:0.75rem; color:#e74c3c; border-color:rgba(231,76,60,0.3)"
-                              (click)="$event.stopPropagation(); limpiarArchivo()">
-                        <i class="bi bi-trash"></i> Eliminar
-                      </button>
-                    </div>
-                  }
-                </div>
-                <input #fileInput type="file" class="d-none"
-                       accept="application/pdf"
-                       (change)="onFileChange($event)">
-              </div>
-
-              <div class="d-flex justify-content-end mt-2">
-                <button class="btn-glass-primary"
-                        (click)="enviarSolicitud()"
-                        [disabled]="enviando() || !nuevaSolicitud().motivo.trim()">
-                  @if (enviando()) { <span class="spinner-glass"></span> }
-                  <i class="bi bi-send"></i> Enviar solicitud
-                </button>
-              </div>
-
-            </div>
+      <!-- Formulario nueva solicitud — SIEMPRE visible -->
+      <div class="col-lg-5">
+        <div class="card-glass">
+          <div class="card-glass-header">
+            <h5><i class="bi bi-plus-circle me-2" style="color:#2ecc71"></i>Nueva solicitud</h5>
           </div>
-        </div>
+          <div class="card-glass-body d-flex flex-column gap-3">
 
-        <!-- Mis solicitudes -->
-        <div class="col-lg-7">
-          <div class="card-glass">
-            <div class="card-glass-header">
-              <h5><i class="bi bi-list-ul me-2" style="color:#2e86c1"></i>Mis solicitudes</h5>
-              <span class="badge-pendiente" style="background:rgba(46,134,193,0.15); color:#2e86c1; border-color:rgba(46,134,193,0.3)">
-                {{ solicitudes().length }}
-              </span>
+            <div>
+              <label class="form-label-glass">Tipo de documento</label>
+              <select class="form-select-glass" [(ngModel)]="nuevaSolicitud().tipoDocumento">
+                @for (tipo of tiposDocumento; track tipo.value) {
+                  <option [value]="tipo.value">{{ tipo.label }}</option>
+                }
+              </select>
             </div>
 
-            @if (solicitudes().length === 0) {
-              <div class="empty-state">
-                <i class="bi bi-inbox"></i>
-                No tienes solicitudes aún
-              </div>
-            }
+            <div>
+              <label class="form-label-glass">
+                Fichaje relacionado
+                <span style="color:#4a7a99; text-transform:none; font-weight:400">(opcional)</span>
+              </label>
+              <select class="form-select-glass" [(ngModel)]="nuevaSolicitud().fichajeId">
+                <option [ngValue]="null">-- Ninguno --</option>
+                @for (fichaje of fichajes(); track fichaje.id) {
+                  <option [ngValue]="fichaje.id">
+                    {{ fichaje.fecha | date:'dd/MM/yyyy' }}
+                  </option>
+                }
+              </select>
+            </div>
 
-            @for (solicitud of solicitudes(); track solicitud.id) {
-              <div class="sol-item d-flex align-items-center gap-3">
-                <div class="flex-grow-1">
-                  <div class="sol-motivo">{{ solicitud.motivo }}</div>
-                  <div class="sol-meta">
-                    <i class="bi bi-calendar3 me-1"></i>
-                    {{ formatearFecha(solicitud.fechaSolicitud) }}
-                  </div>
-                </div>
-                <div class="d-flex align-items-center gap-2 flex-shrink-0">
-                  @if (getJustificanteBySolicitud(solicitud.id)) {
-                    <button class="btn-glass"
-                            (click)="abrirModalPdf(getJustificanteBySolicitud(solicitud.id)!.id)">
-                      <i class="bi bi-file-pdf"></i> Ver PDF
+            <div>
+              <label class="form-label-glass">
+                Motivo <span style="color:#e74c3c">*</span>
+              </label>
+              <textarea class="form-control-glass" rows="4"
+                [(ngModel)]="nuevaSolicitud().motivo"
+                placeholder="Describe el motivo de tu solicitud...">
+              </textarea>
+            </div>
+
+            <div>
+              <label class="form-label-glass">
+                Justificante PDF
+                <span style="color:#4a7a99; text-transform:none; font-weight:400">(opcional, máx. 5MB)</span>
+              </label>
+              <div class="drop-zone" (click)="fileInput.click()">
+                @if (!nombreArchivo()) {
+                  <div class="drop-icon"><i class="bi bi-cloud-upload"></i></div>
+                  <div class="drop-text">Haz clic para seleccionar un PDF</div>
+                  <div class="drop-text" style="margin-top:4px">o arrastra y suelta aquí</div>
+                }
+                @if (nombreArchivo()) {
+                  <div class="file-ok">
+                    <i class="bi bi-file-pdf-fill me-2"></i>{{ nombreArchivo() }}
+                    <br>
+                    <button class="btn-glass mt-2"
+                            style="font-size:0.75rem; color:#e74c3c; border-color:rgba(231,76,60,0.3)"
+                            (click)="$event.stopPropagation(); limpiarArchivo()">
+                      <i class="bi bi-trash"></i> Eliminar
                     </button>
-                  }
-                  <span [class]="getBadgeClass(solicitud.estado)">
-                    {{ solicitud.estado }}
-                  </span>
-                </div>
+                  </div>
+                }
               </div>
-            }
+              <input #fileInput type="file" class="d-none"
+                     accept="application/pdf"
+                     (change)="onFileChange($event)">
+            </div>
+
+            <div class="d-flex justify-content-end mt-2">
+              <button class="btn-glass-primary"
+                      (click)="enviarSolicitud()"
+                      [disabled]="enviando() || !nuevaSolicitud().motivo.trim()">
+                @if (enviando()) { <span class="spinner-glass"></span> }
+                <i class="bi bi-send"></i> Enviar solicitud
+              </button>
+            </div>
+
           </div>
         </div>
-
       </div>
-    }
 
+      <!-- Mis solicitudes — SIEMPRE visible (empleado ve las suyas, admin las suyas propias) -->
+      <div class="col-lg-7">
+        <div class="card-glass">
+          <div class="card-glass-header">
+            <h5>
+              <i class="bi bi-list-ul me-2" style="color:#2e86c1"></i>
+              {{ esAdmin() ? 'Mis solicitudes' : 'Mis solicitudes' }}
+            </h5>
+            <span class="badge-pendiente"
+                  style="background:rgba(46,134,193,0.15); color:#2e86c1; border-color:rgba(46,134,193,0.3)">
+              {{ solicitudesPropias().length }}
+            </span>
+          </div>
+
+          @if (solicitudesPropias().length === 0) {
+            <div class="empty-state">
+              <i class="bi bi-inbox"></i>
+              No tienes solicitudes aún
+            </div>
+          }
+
+          @for (solicitud of solicitudesPropias(); track solicitud.id) {
+            <div class="sol-item d-flex align-items-center gap-3">
+              <div class="flex-grow-1">
+                <div class="sol-motivo">{{ solicitud.motivo }}</div>
+                <div class="sol-meta">
+                  <i class="bi bi-calendar3 me-1"></i>
+                  {{ formatearFecha(solicitud.fechaSolicitud) }}
+                </div>
+              </div>
+              <div class="d-flex align-items-center gap-2 flex-shrink-0">
+                @if (getJustificanteBySolicitud(solicitud.id)) {
+                  <button class="btn-glass"
+                          (click)="abrirModalPdf(getJustificanteBySolicitud(solicitud.id)!.id)">
+                    <i class="bi bi-file-pdf"></i> Ver PDF
+                  </button>
+                }
+                <span [class]="getBadgeClass(solicitud.estado)">{{ solicitud.estado }}</span>
+              </div>
+            </div>
+          }
+        </div>
+      </div>
+    </div>
+
+    <!-- ══════════════ SOLO ADMIN: Lista de todas las solicitudes ══════════════ -->
     @if (esAdmin()) {
 
       <div class="row g-3 mb-4">
         <div class="col-4">
           <div class="stat-card-glass">
             <div class="stat-value">{{ solicitudes().length }}</div>
-            <div class="stat-label">Total</div>
+            <div class="stat-label">Total empleados</div>
           </div>
         </div>
         <div class="col-4">
@@ -196,14 +188,21 @@
         </div>
       </div>
 
-      <div class="mb-3">
+      <div class="mb-3 d-flex align-items-center gap-3">
         <select class="filter-select" [(ngModel)]="filtroEstado">
           @for (estado of estadosFiltro; track estado.value) {
             <option [value]="estado.value">{{ estado.label }}</option>
           }
         </select>
+        <span style="font-size:0.8rem; color:#4a7a99">
+          Mostrando {{ solicitudesFiltradas().length }} de {{ solicitudes().length }}
+        </span>
       </div>
+
       <div class="card-glass">
+        <div class="card-glass-header">
+          <h5><i class="bi bi-people me-2" style="color:#f39c12"></i>Solicitudes de empleados</h5>
+        </div>
 
         @if (solicitudesFiltradas().length === 0) {
           <div class="empty-state">
@@ -225,37 +224,34 @@
                   <span class="sol-motivo">{{ getNombreUsuario(solicitud.usuario) }}</span>
                   <span [class]="getBadgeClass(solicitud.estado)">{{ solicitud.estado }}</span>
                 </div>
-                <div class="sol-motivo" style="font-weight:400; font-size:0.85rem; color:#a8c8d8; margin-bottom:0.3rem">
+                <div style="font-size:0.85rem; color:#a8c8d8; margin-bottom:0.3rem">
                   {{ solicitud.motivo }}
                 </div>
                 <div class="sol-meta mb-3">
                   <i class="bi bi-calendar3 me-1"></i>{{ formatearFecha(solicitud.fechaSolicitud) }}
                 </div>
+
                 @if (getJustificanteBySolicitud(solicitud.id)) {
                   <button class="btn-glass mb-2"
                           (click)="abrirModalPdf(getJustificanteBySolicitud(solicitud.id)!.id)">
                     <i class="bi bi-file-pdf"></i> Ver justificante PDF
                   </button>
                 }
+
                 @if (solicitud.estado === 'PENDIENTE') {
                   <div class="d-flex flex-wrap align-items-center gap-2 mt-1">
-                    <input class="comment-input"
-                           style="max-width:220px"
-                           type="text"
-                           placeholder="Comentario (opcional)"
+                    <input class="comment-input" style="max-width:220px"
+                           type="text" placeholder="Comentario (opcional)"
                            [(ngModel)]="comentariosAdmin()[solicitud.id]"
                            [ngModelOptions]="{ standalone: true }">
-                    <button class="btn-glass btn-glass-success"
-                            (click)="aprobarSolicitud(solicitud)">
+                    <button class="btn-glass btn-glass-success" (click)="aprobarSolicitud(solicitud)">
                       <i class="bi bi-check-lg"></i> Aprobar
                     </button>
-                    <button class="btn-glass btn-glass-danger"
-                            (click)="rechazarSolicitud(solicitud)">
+                    <button class="btn-glass btn-glass-danger" (click)="rechazarSolicitud(solicitud)">
                       <i class="bi bi-x-lg"></i> Rechazar
                     </button>
                   </div>
                 }
-
               </div>
             </div>
           </div>
@@ -265,6 +261,7 @@
   }
 </div>
 
+<!-- Modal PDF -->
 <div class="modal fade modal-glass" id="modalPdf" tabindex="-1" aria-hidden="true">
   <div class="modal-dialog modal-xl modal-dialog-centered">
     <div class="modal-content">

@@ -36,15 +36,22 @@ public class SecurityConfig {
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers(org.springframework.http.HttpMethod.OPTIONS, "/**").permitAll()
                         .requestMatchers("/api/auth/login", "/api/auth/register").permitAll()
-                        .requestMatchers("/api/horarios").permitAll() 
+                        .requestMatchers("/api/horarios").permitAll()
                         .requestMatchers("/api/horarios/**").permitAll()
                         .requestMatchers("/api/fichajes").hasAnyRole("ADMIN", "EMPLEADO", "RRHH")
                         .requestMatchers("/api/fichajes/**").hasAnyRole("ADMIN", "EMPLEADO", "RRHH")
-                        .requestMatchers("/api/solicitudes").hasAnyRole("ADMIN", "RRHH")
+                        .requestMatchers("/api/solicitudes/mis-solicitudes").hasAnyRole("EMPLEADO", "ADMIN", "RRHH")
+                        .requestMatchers(org.springframework.http.HttpMethod.POST, "/api/solicitudes")
+                        .hasAnyRole("EMPLEADO", "ADMIN", "RRHH")
                         .requestMatchers("/api/solicitudes/**").hasAnyRole("ADMIN", "RRHH")
+                        .requestMatchers("/api/solicitudes").hasAnyRole("ADMIN", "RRHH")
                         .requestMatchers("/api/usuarios").hasRole("ADMIN")
                         .requestMatchers("/api/usuarios/**").hasAnyRole("ADMIN", "EMPLEADO")
+                        .requestMatchers("/api/justificantes").hasAnyRole("ADMIN", "RRHH")
+                        .requestMatchers("/api/justificantes/**").hasAnyRole("ADMIN", "RRHH")
                         .requestMatchers("/admin/**").hasRole("ADMIN")
+                        .requestMatchers("/api/fichajes/**").hasAnyRole("ADMIN", "EMPLEADO", "RRHH")
+                        .requestMatchers("/api/usuarios/**").hasAnyRole("ADMIN", "EMPLEADO")
                         .anyRequest().authenticated())
                 .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class);
 
@@ -54,8 +61,6 @@ public class SecurityConfig {
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
-
-        
 
         configuration.setAllowedOrigins(List.of("http://localhost:4200"));
 

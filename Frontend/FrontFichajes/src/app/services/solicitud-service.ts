@@ -4,12 +4,10 @@ import { firstValueFrom } from 'rxjs';
 import { ISolicitudes } from '../interface/isolicitudes';
 import { IJustificante } from '../interface/ijustificante';
 
-export interface RevisionDTO {
-  estado: string;
-  comentario: string;
-}
+@Injectable({ 
+  providedIn: 'root' 
+})
 
-@Injectable({ providedIn: 'root' })
 export class SolicitudService {
 
   private http = inject(HttpClient);
@@ -83,7 +81,12 @@ export class SolicitudService {
   }
 
   verPdf(justificanteId: number): string {
-    // Devuelve la URL directamente para usarla en un <iframe> o window.open()
     return `${this.apiJustificantes}/${justificanteId}/ver`;
+  }
+
+  obtenerMisSolicitudes(): Promise<ISolicitudes[]> {
+    return firstValueFrom(
+      this.http.get<ISolicitudes[]>(`${this.apiSolicitudes}/mis-solicitudes`)
+    );
   }
 }

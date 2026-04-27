@@ -276,11 +276,26 @@ public class FichajeController {
         }
     }
 
+    @GetMapping("/solicitudes/mis-solicitudes")
+public ResponseEntity<?> getMisSolicitudes(Authentication auth) {
+    if (auth == null || !auth.isAuthenticated()) {
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Usuario no autenticado");
+    }
+    try {
+        List<Solicitudes> mias = fichajeServices.getSolicitudesByEmail(auth.getName());
+        return ResponseEntity.ok(mias);
+    } catch (Exception e) {
+        e.printStackTrace(); 
+        return ResponseEntity.status(500).body("Error interno: " + e.getMessage());
+    }
+}
+
     @GetMapping("/solicitudes")
     public ResponseEntity<?> getAllSolicitudes(@RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "100") int size) {
         try {
             return ResponseEntity.ok(fichajeServices.getAllSolicitudes(page, size));
+
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error al obtener las solicitudes");
         }
@@ -352,7 +367,6 @@ public class FichajeController {
         }
     }
 
-// Admin ve todos, empleado ve los suyos — mismo endpoint
     @GetMapping("/justificantes")
     public ResponseEntity<?> getJustificantes(Authentication auth) {
         try {

@@ -46,3 +46,8 @@ export interface EstadisticasSolicitudesDTO {
     rechazadas: number
     porTipoDocumento: { [key: string]: number }
 }
+
+export interface RevisionDTO {
+  estado: string;
+  comentario: string;
+}

@@ -87,8 +87,6 @@ public class JustificanteService {
                 .orElseThrow(() -> new RuntimeException("Admin no encontrado"));
 
         j.setEstado(EstadoJustificante.PENDIENTE);
-        j.setComentarioAdmin(comentario);
-        j.setFechaRevision(LocalDateTime.now());
         j.setRevisadoPor(admin);
 
         return justificanteRepository.save(j);

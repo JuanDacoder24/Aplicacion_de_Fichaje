@@ -2,6 +2,9 @@ package com.example.gestionfichaje.entity;
 
 import java.time.LocalDateTime;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+
+import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -17,16 +20,23 @@ public class Solicitudes {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int id;
+    
     @ManyToOne
     @JoinColumn(name = "usuario_id")
+    @JsonIgnoreProperties({"passwordHash", "fichajes", "solicitudes"})
     private Usuarios usuario;
 
     @ManyToOne
     @JoinColumn(name = "fichaje_id")
     private Fichajes fichaje;
 
+    @Column(name = "motivo")
     private String motivo;
+
+    @Column(name = "estado")
     private String estado;
+
+    @Column(name = "fecha_solicitud")
     private LocalDateTime fechaSolicitud;
 
     public Solicitudes() {} 

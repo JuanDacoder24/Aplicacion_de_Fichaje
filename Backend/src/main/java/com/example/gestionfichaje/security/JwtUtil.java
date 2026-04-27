@@ -19,15 +19,16 @@ public class JwtUtil {
     }
 
     // ← Ahora recibe también el rol
-    public String generateToken(String username, String rol) {
-        return Jwts.builder()
-                .setSubject(username)
-                .claim("rol", rol)  // ← "ADMIN" o "EMPLEADO" viaja en el token
-                .setIssuedAt(new Date())
-                .setExpiration(new Date(System.currentTimeMillis() + 1000 * 60 * 60 * 10))
-                .signWith(getSigningKey(), SignatureAlgorithm.HS256)
-                .compact();
-    }
+    public String generateToken(String email, String rol) { // Cambia username por email
+    return Jwts.builder()
+            .setSubject(email) // Ahora el subject será el email real
+            .claim("rol", rol)
+            .setIssuedAt(new Date())
+            .setExpiration(new Date(System.currentTimeMillis() + 1000 * 60 * 60 * 10))
+            .signWith(getSigningKey(), SignatureAlgorithm.HS256)
+            .compact();
+}
+    
 
     public String extractUsername(String token) {
         return Jwts.parser()

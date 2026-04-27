@@ -184,10 +184,6 @@ public class FichajeServices {
         horariosRepository.deleteById(id);
     }
 
-    public List<Solicitudes> getAllSolicitudes() {
-        return solicitudesRepository.findAll();
-    }
-
     public Solicitudes saveSolicitud(Solicitudes solicitud) {
         return solicitudesRepository.save(solicitud);
     }
@@ -203,6 +199,15 @@ public class FichajeServices {
 
     public Solicitudes getSolicitudById(Integer id) {
         return solicitudesRepository.findById(id).orElse(null);
+    }
+
+    public List<Solicitudes> getSolicitudesByEmail(String identifier) {
+        // Buscamos al usuario de forma flexible
+        Usuarios usuario = usuariosRepository.findByEmail(identifier)
+                .or(() -> usuariosRepository.findByNombre(identifier))
+                .orElseThrow(() -> new RuntimeException("No se encontró al usuario con: " + identifier));
+
+        return solicitudesRepository.findByUsuario(usuario);
     }
 
     public List<Usuarios> getAllUsuarios() {
@@ -301,8 +306,6 @@ public class FichajeServices {
                 .orElseThrow(() -> new RuntimeException("Admin no encontrado"));
 
         j.setEstado(estado);
-        j.setComentarioAdmin(comentario);
-        j.setFechaRevision(LocalDateTime.now());
         j.setRevisadoPor(admin);
 
         return justificanteRepository.save(j);

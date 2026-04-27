@@ -32,19 +32,20 @@ public class Justificante {
     @JoinColumn(name = "solicitud_id")
     private Solicitudes solicitud; 
 
+    @Column(name = "nombre_archivo")
     private String nombreArchivo;
+
+    @Column(name = "tipo_documento")
     private String tipoDocumento; 
+
+    @Column(name = "ruta_archivo")
     private String rutaArchivo;
 
     @Enumerated(EnumType.STRING)
     private EstadoJustificante estado = EstadoJustificante.PENDIENTE;
 
-    private String comentarioAdmin;
-
     @Column(name = "fecha_subida")
     private LocalDateTime fechaSubida = LocalDateTime.now();
-
-    private LocalDateTime fechaRevision;
 
     @ManyToOne
     @JoinColumn(name = "revisado_por")
@@ -54,8 +55,8 @@ public class Justificante {
     }
 
     public Justificante(Integer id, Usuarios usuario, Fichajes fichaje, Solicitudes solicitud, String nombreArchivo,
-            String tipoDocumento, String rutaArchivo, EstadoJustificante estado, String comentarioAdmin,
-            LocalDateTime fechaSubida, LocalDateTime fechaRevision, Usuarios revisadoPor) {
+            String tipoDocumento, String rutaArchivo, EstadoJustificante estado,
+            LocalDateTime fechaSubida, Usuarios revisadoPor) {
         this.id = id;
         this.usuario = usuario;
         this.fichaje = fichaje;
@@ -64,9 +65,7 @@ public class Justificante {
         this.tipoDocumento = tipoDocumento;
         this.rutaArchivo = rutaArchivo;
         this.estado = estado;
-        this.comentarioAdmin = comentarioAdmin;
         this.fechaSubida = fechaSubida;
-        this.fechaRevision = fechaRevision;
         this.revisadoPor = revisadoPor;
     }
 
@@ -134,28 +133,12 @@ public class Justificante {
         this.estado = estado;
     }
 
-    public String getComentarioAdmin() {
-        return comentarioAdmin;
-    }
-
-    public void setComentarioAdmin(String comentarioAdmin) {
-        this.comentarioAdmin = comentarioAdmin;
-    }
-
     public LocalDateTime getFechaSubida() {
         return fechaSubida;
     }
 
     public void setFechaSubida(LocalDateTime fechaSubida) {
         this.fechaSubida = fechaSubida;
-    }
-
-    public LocalDateTime getFechaRevision() {
-        return fechaRevision;
-    }
-
-    public void setFechaRevision(LocalDateTime fechaRevision) {
-        this.fechaRevision = fechaRevision;
     }
 
     public Usuarios getRevisadoPor() {

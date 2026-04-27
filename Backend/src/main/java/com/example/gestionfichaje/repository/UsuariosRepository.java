@@ -9,9 +9,8 @@ import com.example.gestionfichaje.entity.Usuarios;
 @Repository
 public interface UsuariosRepository extends JpaRepository<Usuarios, Integer> {
 
-    Usuarios findByNombre(String nombre);
+    Optional<Usuarios> findByNombre(String nombre);
 
     Optional<Usuarios> findByEmail(String email); 
-
 
 }

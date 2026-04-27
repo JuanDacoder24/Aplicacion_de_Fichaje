@@ -22,10 +22,11 @@ public class UserService implements UserDetailsService {
 
     @Override
     public UserDetails loadUserByUsername(String nombre) throws UsernameNotFoundException {
-        Usuarios usuario = usuariosRepository.findByNombre(nombre);
+        Usuarios usuario = usuariosRepository.findByNombre(nombre)
+            .orElseThrow(() -> new UsernameNotFoundException("Usuario no encontrado: " + nombre));
 
-        if (usuario == null || !usuario.isActivo()) {
-            throw new UsernameNotFoundException("Usuario no encontrado: " + nombre);
+        if (!usuario.isActivo()) {
+            throw new UsernameNotFoundException("Usuario no activo: " + nombre);
         }
 
         return UserDetailsImpl.build(usuario); 
