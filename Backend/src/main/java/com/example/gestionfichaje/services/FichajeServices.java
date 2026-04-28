@@ -1,9 +1,11 @@
 package com.example.gestionfichaje.services;
 
+import java.io.IOException;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.net.MalformedURLException;
 import java.nio.file.Files;
+import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
 import java.time.Duration;
@@ -16,6 +18,8 @@ import java.util.UUID;
 import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.core.io.Resource;
 import org.springframework.core.io.UrlResource;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -37,11 +41,6 @@ import com.example.gestionfichaje.repository.HorariosRepository;
 import com.example.gestionfichaje.repository.JustificanteRepository;
 import com.example.gestionfichaje.repository.SolicitudesRepository;
 import com.example.gestionfichaje.repository.UsuariosRepository;
-
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.core.io.Resource;
-import java.io.IOException;
-import java.nio.file.Path;
 
 @Service
 public class FichajeServices {
@@ -202,7 +201,6 @@ public class FichajeServices {
     }
 
     public List<Solicitudes> getSolicitudesByEmail(String identifier) {
-        // Buscamos al usuario de forma flexible
         Usuarios usuario = usuariosRepository.findByEmail(identifier)
                 .or(() -> usuariosRepository.findByNombre(identifier))
                 .orElseThrow(() -> new RuntimeException("No se encontró al usuario con: " + identifier));

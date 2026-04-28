@@ -1,0 +1,14 @@
+28/04/2026
+
+Revisar las solicitudes propias del admin y las de los empledos, saber diferenciarlo, que no sean las mismas, pueden haber dos soluciones, dividirlos en otra pagina o hacer un modal, pero el objetivo es diferencias
+las distintas solicitudes
+
+Revisar la interface de justificante en angular, sobre todo si son necesarios los tres últimos tipos
+
+Una vez terminado con lo anterior, hace la pagina de documentos, aquí se mostraran todos los documentos (archivos PDFs) enviados, esto solo lo podrá ver el usuario
+
+Revisar las acciones de eliminar y editar en la pagina de fichajes
+
+Revisar los filtros de la pagina de fichajes
+
+En la pagina de horarios, ordenar los horarios por cada usuario, lo mejor seria crear un componente

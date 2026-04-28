@@ -3,6 +3,7 @@ import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { firstValueFrom } from 'rxjs';
 import { IUser } from '../interface/iuser';
 import { IUsuario, IUsuarioRegistro } from '../interface/iusuario';
+import { Rol } from '../enum/rol';
 
 @Injectable({
   providedIn: 'root',
@@ -52,10 +53,21 @@ export class AuthService {
   }
 
   async login(user: IUser): Promise<any> {
-    const res = await firstValueFrom(this.httpClient.post<any>(`${this.authUrl}/login`, user));
-    if (res.token && res.rol) this.setAuthData(res.token, res.rol, res.id, res.nombre)
-    return res;
+  const res = await firstValueFrom(this.httpClient.post<any>(`${this.authUrl}/login`, user));
+  if (res.token && res.rol) {
+    this.setAuthData(res.token, res.rol, res.id, res.nombre);
+    
+    const userComplete = {
+      id: res.id,
+      nombre: res.nombre,
+      email: res.email || '',
+      rol: res.rol,
+      token: res.token
+    };
+    localStorage.setItem('user', JSON.stringify(userComplete));
   }
+  return res;
+}
 
   async register(usuario: IUsuarioRegistro): Promise<any> {
     return await firstValueFrom(
@@ -74,15 +86,24 @@ export class AuthService {
   }
 
   setAuthData(token: string, rol: string, id: number, nombre: string) {
-    localStorage.setItem('token', token)
-    localStorage.setItem('rol', rol)
-    localStorage.setItem('id', String(id))
-    localStorage.setItem('nombre', nombre)
-    this.tokenSignal.set(token)
-    this.rolSignal.set(rol)
-    this.idSignal.set(id)
-    this.nombreSignal.set(nombre)
-  }
+  localStorage.setItem('token', token)
+  localStorage.setItem('rol', rol)
+  localStorage.setItem('id', String(id))
+  localStorage.setItem('nombre', nombre)
+  
+  const userObject = {
+    id: id,
+    nombre: nombre,
+    rol: rol,
+    email: '' 
+  };
+  localStorage.setItem('user', JSON.stringify(userObject))
+  
+  this.tokenSignal.set(token)
+  this.rolSignal.set(rol)
+  this.idSignal.set(id)
+  this.nombreSignal.set(nombre)
+}
 
   cambiarRol(nuevoRol: string) {
     if (nuevoRol === 'admin' || nuevoRol === 'empleado') {
@@ -110,13 +131,38 @@ export class AuthService {
     return this.hasRole('empleado');
   }
 
-  async getCurrentUser(): Promise<IUsuario | null> {
-    const id = this.idSignal();
-    if (!id) return null;
-    return await firstValueFrom(
-      this.httpClient.get<IUsuario>(`${this.usuariosUrl}/${id}`, {
-        headers: this.getAuthHeaders(),
-      })
-    );
+getCurrentUser(): Promise<IUsuario | null> {
+  const userStr = localStorage.getItem('user');
+  
+  if (userStr) {
+    try {
+      const user = JSON.parse(userStr);
+      console.log('Usuario desde user:', user);
+      return Promise.resolve(user);
+    } catch (e) {
+      console.error('Error parseando user:', e);
+    }
   }
+  
+  const id = localStorage.getItem('id');
+  const nombre = localStorage.getItem('nombre');
+  const rol = localStorage.getItem('rol');
+  
+  if (id && nombre && rol) {
+    const user: IUsuario = {
+      id: parseInt(id),
+      nombre: nombre,
+      rol: rol === 'ADMIN' ? Rol.ADMIN : Rol.EMPLEADO,
+      email: '',
+      passwordHash: '',
+      departamento: 0,
+      fechaAlta: 0,
+      activo: true
+    };
+    console.log('Usuario construido desde campos:', user);
+    return Promise.resolve(user);
+  }
+  
+  return Promise.resolve(null);
+}
 }

@@ -119,7 +119,6 @@
         </div>
       </div>
 
-      <!-- Mis solicitudes — SIEMPRE visible (empleado ve las suyas, admin las suyas propias) -->
       <div class="col-lg-7">
         <div class="card-glass">
           <div class="card-glass-header">
@@ -133,7 +132,7 @@
             </span>
           </div>
 
-          @if (solicitudesPropias().length === 0) {
+          @if (solicitudes().length === 0) {
             <div class="empty-state">
               <i class="bi bi-inbox"></i>
               No tienes solicitudes aún
