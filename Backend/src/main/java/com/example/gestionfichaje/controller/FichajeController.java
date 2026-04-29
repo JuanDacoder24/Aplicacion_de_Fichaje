@@ -1,5 +1,6 @@
 package com.example.gestionfichaje.controller;
 
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -277,18 +278,18 @@ public class FichajeController {
     }
 
     @GetMapping("/solicitudes/mis-solicitudes")
-public ResponseEntity<?> getMisSolicitudes(Authentication auth) {
-    if (auth == null || !auth.isAuthenticated()) {
-        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Usuario no autenticado");
+    public ResponseEntity<?> getMisSolicitudes(Authentication auth) {
+        if (auth == null || !auth.isAuthenticated()) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Usuario no autenticado");
+        }
+        try {
+            List<Solicitudes> mias = fichajeServices.getSolicitudesByEmail(auth.getName());
+            return ResponseEntity.ok(mias);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ResponseEntity.status(500).body("Error interno: " + e.getMessage());
+        }
     }
-    try {
-        List<Solicitudes> mias = fichajeServices.getSolicitudesByEmail(auth.getName());
-        return ResponseEntity.ok(mias);
-    } catch (Exception e) {
-        e.printStackTrace(); 
-        return ResponseEntity.status(500).body("Error interno: " + e.getMessage());
-    }
-}
 
     @GetMapping("/solicitudes")
     public ResponseEntity<?> getAllSolicitudes(@RequestParam(defaultValue = "0") int page,
@@ -311,12 +312,29 @@ public ResponseEntity<?> getMisSolicitudes(Authentication auth) {
     }
 
     @PostMapping("/solicitudes")
-    public ResponseEntity<?> createSolicitud(@RequestBody Solicitudes solicitud) {
+    public ResponseEntity<?> createSolicitud(@RequestBody Solicitudes solicitud, Authentication auth) {
         try {
+            if (auth == null || !auth.isAuthenticated()) {
+                return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Usuario no autenticado");
+            }
+
+            String email = auth.getName();
+
+            Usuarios usuario = fichajeServices.findByEmail(email).orElse(null);
+            if (usuario == null) {
+                return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Usuario no encontrado");
+            }
+
+            solicitud.setUsuario(usuario);
+            solicitud.setEstado("PENDIENTE");
+
             Solicitudes savedSolicitud = fichajeServices.saveSolicitud(solicitud);
             return ResponseEntity.ok(savedSolicitud);
+
         } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error al crear la solicitud");
+            e.printStackTrace();
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body("Error al crear la solicitud: " + e.getMessage());
         }
     }
 
@@ -340,6 +358,27 @@ public ResponseEntity<?> getMisSolicitudes(Authentication auth) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error al eliminar la solicitud");
         }
     }
+
+    @GetMapping("/fichajes/abierto")
+public ResponseEntity<?> getFichajeAbierto(
+        @RequestParam Integer usuarioId,
+        @RequestParam String fecha) {
+    try {
+        LocalDate fechaBusqueda = LocalDate.parse(fecha); 
+        
+        Fichajes fichaje = fichajeServices.findFichajeAbierto(usuarioId, fechaBusqueda);
+        
+        if (fichaje == null) {
+            return ResponseEntity.ok(null); 
+        }
+        
+        return ResponseEntity.ok(fichaje);
+    } catch (Exception e) {
+        e.printStackTrace();
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+            .body("Error al obtener fichaje abierto: " + e.getMessage());
+    }
+}
 
     @PostMapping("/justificantes")
     public ResponseEntity<?> subirJustificante(
@@ -383,7 +422,7 @@ public ResponseEntity<?> getMisSolicitudes(Authentication auth) {
         }
     }
 
-// Solo admin
+    // Solo admin
     @GetMapping("/justificantes/pendientes")
     public ResponseEntity<?> getJustificantesPendientes(Authentication auth) {
         try {

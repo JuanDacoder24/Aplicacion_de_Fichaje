@@ -24,23 +24,15 @@ export class FichajeService {
 
   //Esto construye la cabecera HTTP que el backend espera para verificar que estás autenticado.
   private getAuthHeaders(): HttpHeaders {
-    return new HttpHeaders({
-      Authorization: `Bearer ${this.tokenSignal()}`
-    })
+    return new HttpHeaders({Authorization: `Bearer ${this.tokenSignal()}`})
   }
 
   async getUsuarios(): Promise<IUsuario[]> {
-    return await firstValueFrom(this.httpClient.get<IUsuario[]>(`${this.apiUrl}/usuarios`, {
-      headers: this.getAuthHeaders()
-    })
-    )
+    return await firstValueFrom(this.httpClient.get<IUsuario[]>(`${this.apiUrl}/usuarios`, {headers: this.getAuthHeaders()}))
   }
 
   async getUsuarioById(id: number): Promise<IUsuario> {
-    return await firstValueFrom(this.httpClient.get<IUsuario>(`${this.apiUrl}/usuarios/${id}`, {
-      headers: this.getAuthHeaders()
-    })
-    )
+    return await firstValueFrom(this.httpClient.get<IUsuario>(`${this.apiUrl}/usuarios/${id}`, {headers: this.getAuthHeaders()}))
   }
 
   async updateUserById(user: IUsuario): Promise<IUsuario> {
@@ -50,17 +42,11 @@ export class FichajeService {
   // FICHAJES 
 
   async getFichajes(page = 0, size = 100): Promise<any> {
-    return await firstValueFrom(this.httpClient.get<any>(`${this.fichajesUrl}?page=${page}&size=${size}`, {
-      headers: this.getAuthHeaders()
-    })
-    )
+    return await firstValueFrom(this.httpClient.get<any>(`${this.fichajesUrl}?page=${page}&size=${size}`, { headers: this.getAuthHeaders() }));
   }
 
   async getFichajesByUsuario(usuarioId: number, page = 0, size = 100): Promise<any> {
-    return await firstValueFrom(this.httpClient.get<any>(`${this.fichajesUrl}/${usuarioId}?page=${page}&size=${size}`, {
-      headers: this.getAuthHeaders()
-    })
-    )
+    return await firstValueFrom(this.httpClient.get<any>(`${this.fichajesUrl}/${usuarioId}?page=${page}&size=${size}`, { headers: this.getAuthHeaders() }));
   }
 
   async createFichaje(tipo: 'ENTRADA' | 'SALIDA'): Promise<any> {
@@ -84,33 +70,22 @@ export class FichajeService {
     );
   }
   async updateFichaje(id: number, fichaje: IFichajes): Promise<IFichajes> {
-    return await firstValueFrom(this.httpClient.put<IFichajes>(`${this.fichajesUrl}/${id}`, fichaje, {
-      headers: this.getAuthHeaders()
-    })
+    return await firstValueFrom(this.httpClient.put<IFichajes>(`${this.fichajesUrl}/${id}`, fichaje, {headers: this.getAuthHeaders()})
     )
   }
 
   async deleteFichaje(id: number): Promise<any> {
-    return await firstValueFrom(this.httpClient.delete<any>(`${this.fichajesUrl}/${id}`, {
-      headers: this.getAuthHeaders()
-    })
-    )
+    return await firstValueFrom(this.httpClient.delete<any>(`${this.fichajesUrl}/${id}`, {headers: this.getAuthHeaders()}))
   }
 
   async getFichajesPorRango(inicio: string, fin: string): Promise<any> {
-    return await firstValueFrom(this.httpClient.get<any>(`${this.fichajesUrl}/rango?inicio=${inicio}&fin=${fin}`,
-      {
-        headers: this.getAuthHeaders()
-
-      })
-    )
+    return await firstValueFrom(this.httpClient.get<any>(`${this.fichajesUrl}/rango?inicio=${inicio}&fin=${fin}`, {headers: this.getAuthHeaders()}));
   }
 
   async getFichajeAbierto(usuarioId: number, fecha: string): Promise<any> {
     return await firstValueFrom(this.httpClient.get<any>(
       `${this.fichajesUrl}/abierto?usuarioId=${usuarioId}&fecha=${fecha}`,
-      { headers: this.getAuthHeaders() }
-    ));
+      { headers: this.getAuthHeaders() }));
   }
 
   async obtenerFichajesUsuario(): Promise<IFichajes[]> {
@@ -123,10 +98,7 @@ export class FichajeService {
   // HORARIOS 
 
   async getHorarios(): Promise<IHorarios[]> {
-    return await firstValueFrom(this.httpClient.get<IHorarios[]>(this.horariosUrl, {
-      headers: this.getAuthHeaders()
-    })
-    )
+    return await firstValueFrom(this.httpClient.get<IHorarios[]>(this.horariosUrl, {headers: this.getAuthHeaders()}));
   }
 
   async createHorario(horario: any): Promise<any> {
@@ -170,8 +142,7 @@ export class FichajeService {
 
   async getSolicitudes(page = 0, size = 100): Promise<any> {
     return await firstValueFrom(this.httpClient.get<any>(`${this.solicitudesUrl}?page=${page}&size=${size}`, {
-      headers: this.getAuthHeaders()
-    })
+      headers: this.getAuthHeaders()})
     )
   }
 

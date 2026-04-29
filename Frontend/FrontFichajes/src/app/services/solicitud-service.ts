@@ -24,10 +24,21 @@ export class SolicitudService {
   }
 
   crearSolicitud(motivo: string, fichajeId?: number): Promise<ISolicitudes> {
-    return firstValueFrom(
-      this.http.post<ISolicitudes>(this.apiSolicitudes, { motivo, fichajeId })
-    );
-  }
+  const body: any = { motivo };
+  if (fichajeId) body.fichajeId = fichajeId;
+  
+  console.log('POST a /api/solicitudes con:', body);
+  
+  return firstValueFrom(
+    this.http.post<ISolicitudes>(this.apiSolicitudes, body)
+  ).then(response => {
+    console.log('Respuesta del servidor:', response);
+    return response;
+  }).catch(error => {
+    console.error('Error en petición:', error);
+    throw error;
+  });
+}
 
   revisarSolicitud(id: number, estado: string, comentario: string): Promise<ISolicitudes> {
     return firstValueFrom(

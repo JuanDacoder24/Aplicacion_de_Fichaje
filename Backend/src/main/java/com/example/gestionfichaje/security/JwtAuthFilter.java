@@ -49,7 +49,6 @@ public class JwtAuthFilter extends OncePerRequestFilter {
 
         try {
             username = jwtUtil.extractUsername(token);
-            System.out.println("JWT username: " + username);
         } catch (Exception e) {
             System.out.println("Error extrayendo username del token: " + e.getMessage());
             filterChain.doFilter(request, response);
@@ -58,9 +57,6 @@ public class JwtAuthFilter extends OncePerRequestFilter {
 
         if (username != null && SecurityContextHolder.getContext().getAuthentication() == null) {
             UserDetails userDetails = userDetailsService.loadUserByUsername(username);
-
-            System.out.println("UserDetails username: " + userDetails.getUsername());
-            System.out.println("Authorities: " + userDetails.getAuthorities());
 
             if (jwtUtil.isTokenValid(token, userDetails.getUsername())) {
                 UsernamePasswordAuthenticationToken authToken =

@@ -100,10 +100,9 @@ public class FichajeServices {
     }
 
     public Fichajes registrarEntrada(FichajeDTO req) {
-        // Convertir String a LocalDate correctamente
         LocalDate fecha = LocalDate.parse(req.getFecha());
 
-        Fichajes abierto = findAbierto(req.getUsuarioId(), fecha);
+        Fichajes abierto = findFichajeAbierto(req.getUsuarioId(), fecha);
         if (abierto != null) {
             throw new RuntimeException("Ya tienes entrada abierta para " + req.getFecha());
         }
@@ -121,8 +120,9 @@ public class FichajeServices {
     }
 
     public Fichajes registrarSalida(FichajeDTO req) {
+        
         LocalDate fecha = LocalDate.parse(req.getFecha());
-        Fichajes abierto = findAbierto(req.getUsuarioId(), fecha);
+        Fichajes abierto = findFichajeAbierto(req.getUsuarioId(), fecha);
 
         if (abierto == null) {
             throw new RuntimeException("No tienes entrada abierta para cerrar");
@@ -134,7 +134,7 @@ public class FichajeServices {
         return saveFichaje(abierto);
     }
 
-    public Fichajes findAbierto(Integer usuarioId, LocalDate fecha) {
+    public Fichajes findFichajeAbierto(Integer usuarioId, LocalDate fecha) {
         Optional<Fichajes> result = fichajesRepository.findByUsuarioIdAndFechaAndHoraSalidaIsNull(usuarioId, fecha);
         return result.orElse(null);
     }
@@ -201,8 +201,7 @@ public class FichajeServices {
     }
 
     public List<Solicitudes> getSolicitudesByEmail(String identifier) {
-        Usuarios usuario = usuariosRepository.findByEmail(identifier)
-                .or(() -> usuariosRepository.findByNombre(identifier))
+        Usuarios usuario = usuariosRepository.findByEmail(identifier).or(() -> usuariosRepository.findByNombre(identifier))
                 .orElseThrow(() -> new RuntimeException("No se encontró al usuario con: " + identifier));
 
         return solicitudesRepository.findByUsuario(usuario);
@@ -293,6 +292,10 @@ public class FichajeServices {
 
     public List<Justificante> getMisJustificantes(String email) {
         return justificanteRepository.findByUsuarioEmail(email);
+    }
+
+    public Optional<Usuarios> findByEmail(String email) {
+        return usuariosRepository.findByEmail(email);
     }
 
     public Justificante revisarJustificante(Integer id, EstadoJustificante estado,
