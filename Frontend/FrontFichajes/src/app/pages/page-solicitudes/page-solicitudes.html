@@ -51,21 +51,7 @@
               </select>
             </div>
 
-            <div>
-              <label class="form-label-glass">
-                Fichaje relacionado
-                <span style="color:#4a7a99; text-transform:none; font-weight:400">(opcional)</span>
-              </label>
-              <select class="form-select-glass" [(ngModel)]="nuevaSolicitud().fichajeId">
-                <option [ngValue]="null">-- Ninguno --</option>
-                @for (fichaje of fichajes(); track fichaje.id) {
-                  <option [ngValue]="fichaje.id">
-                    {{ fichaje.fecha | date:'dd/MM/yyyy' }}
-                  </option>
-                }
-              </select>
-            </div>
-
+            
             <div>
               <label class="form-label-glass">
                 Motivo <span style="color:#e74c3c">*</span>

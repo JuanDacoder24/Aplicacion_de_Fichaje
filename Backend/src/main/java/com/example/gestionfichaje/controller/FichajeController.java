@@ -338,6 +338,38 @@ public class FichajeController {
         }
     }
 
+    @PutMapping("/solicitudes/{id}/revisar")
+    public ResponseEntity<?> revisarSolicitud(
+            @PathVariable Integer id,
+            @RequestBody Map<String, String> body,
+            Authentication auth) {
+        try {
+            UserDetailsImpl userDetails = (UserDetailsImpl) userDetailsService
+                    .loadUserByUsername(auth.getName());
+
+            if (!"ADMIN".equalsIgnoreCase(userDetails.getRol())) {
+                return ResponseEntity.status(403).body("Sin permisos");
+            }
+
+            String estado = body.get("estado");
+            String comentario = body.get("comentario");
+
+            Solicitudes solicitud = fichajeServices.getSolicitudById(id);
+            if (solicitud == null) {
+                return ResponseEntity.status(404).body("Solicitud no encontrada");
+            }
+
+            solicitud.setEstado(estado);
+            solicitud.setComentarioAdmin(comentario); 
+            Solicitudes actualizada = fichajeServices.saveSolicitud(solicitud);
+
+            return ResponseEntity.ok(actualizada);
+
+        } catch (Exception e) {
+            return ResponseEntity.status(500).body("Error al revisar: " + e.getMessage());
+        }
+    }
+
     @PutMapping("/solicitudes/{id}")
     public ResponseEntity<?> updateSolicitud(@PathVariable Integer id, @RequestBody Solicitudes solicitud) {
         try {
@@ -360,25 +392,25 @@ public class FichajeController {
     }
 
     @GetMapping("/fichajes/abierto")
-public ResponseEntity<?> getFichajeAbierto(
-        @RequestParam Integer usuarioId,
-        @RequestParam String fecha) {
-    try {
-        LocalDate fechaBusqueda = LocalDate.parse(fecha); 
-        
-        Fichajes fichaje = fichajeServices.findFichajeAbierto(usuarioId, fechaBusqueda);
-        
-        if (fichaje == null) {
-            return ResponseEntity.ok(null); 
+    public ResponseEntity<?> getFichajeAbierto(
+            @RequestParam Integer usuarioId,
+            @RequestParam String fecha) {
+        try {
+            LocalDate fechaBusqueda = LocalDate.parse(fecha);
+
+            Fichajes fichaje = fichajeServices.findFichajeAbierto(usuarioId, fechaBusqueda);
+
+            if (fichaje == null) {
+                return ResponseEntity.ok(null);
+            }
+
+            return ResponseEntity.ok(fichaje);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body("Error al obtener fichaje abierto: " + e.getMessage());
         }
-        
-        return ResponseEntity.ok(fichaje);
-    } catch (Exception e) {
-        e.printStackTrace();
-        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-            .body("Error al obtener fichaje abierto: " + e.getMessage());
     }
-}
 
     @PostMapping("/justificantes")
     public ResponseEntity<?> subirJustificante(
