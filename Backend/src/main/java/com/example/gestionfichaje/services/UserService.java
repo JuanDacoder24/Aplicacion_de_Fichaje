@@ -21,14 +21,14 @@ public class UserService implements UserDetailsService {
     private PasswordEncoder passwordEncoder;
 
     @Override
-    public UserDetails loadUserByUsername(String nombre) throws UsernameNotFoundException {
-        Usuarios usuario = usuariosRepository.findByNombre(nombre)
-            .orElseThrow(() -> new UsernameNotFoundException("Usuario no encontrado: " + nombre));
+    public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
+        Usuarios usuario = usuariosRepository.findByEmail(email) // ← cambiar esto
+                .orElseThrow(() -> new UsernameNotFoundException("Usuario no encontrado: " + email));
 
         if (!usuario.isActivo()) {
-            throw new UsernameNotFoundException("Usuario no activo: " + nombre);
+            throw new UsernameNotFoundException("Usuario no activo: " + email);
         }
 
-        return UserDetailsImpl.build(usuario); 
+        return UserDetailsImpl.build(usuario);
     }
 }

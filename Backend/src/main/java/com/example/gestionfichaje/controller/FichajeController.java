@@ -37,6 +37,7 @@ import com.example.gestionfichaje.entity.Rol;
 import com.example.gestionfichaje.entity.Solicitudes;
 import com.example.gestionfichaje.entity.Usuarios;
 import com.example.gestionfichaje.repository.RolRepository;
+import com.example.gestionfichaje.repository.UsuariosRepository;
 import com.example.gestionfichaje.security.JwtUtil;
 import com.example.gestionfichaje.security.UserDetailsImpl;
 import com.example.gestionfichaje.services.FichajeServices;
@@ -57,19 +58,25 @@ public class FichajeController {
     @Autowired
     private PasswordEncoder passwordEncoder;
 
+    @Autowired
+    private UsuariosRepository usuariosRepository;
+
     @PostMapping("/auth/login")
     public ResponseEntity<?> login(@RequestBody LoginRequest request) {
         try {
-            UserDetailsImpl userDetails = (UserDetailsImpl) userDetailsService.loadUserByUsername(request.getNombre());
-
+            Usuarios usuario = usuariosRepository.findByNombre(request.getNombre())
+                    .orElseThrow(() -> new UsernameNotFoundException("Usuario no encontrado"));
+            UserDetailsImpl userDetails = (UserDetailsImpl) userDetailsService.loadUserByUsername(usuario.getEmail());
             if (passwordEncoder.matches(request.getPassword(), userDetails.getPassword())) {
-                String token = jwtUtil.generateToken(userDetails.getUsername(), userDetails.getRol());
+                String token = jwtUtil.generateToken(userDetails.getEmail(), userDetails.getRol()); // ← getEmail()
 
                 return ResponseEntity.ok(Map.of(
                         "token", token,
                         "id", userDetails.getId(),
                         "nombre", userDetails.getUsername(),
-                        "rol", userDetails.getRol()));
+                        "rol", userDetails.getRol()
+                ));
+
             } else {
                 return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Usuario o contraseña incorrectos");
             }
@@ -319,6 +326,8 @@ public class FichajeController {
             }
 
             String email = auth.getName();
+            System.out.println(">>> auth.getName(): " + email);  // ← añade esto
+            System.out.println(">>> auth.getPrincipal(): " + auth.getPrincipal());
 
             Usuarios usuario = fichajeServices.findByEmail(email).orElse(null);
             if (usuario == null) {
@@ -360,7 +369,6 @@ public class FichajeController {
             }
 
             solicitud.setEstado(estado);
-            solicitud.setComentarioAdmin(comentario); 
             Solicitudes actualizada = fichajeServices.saveSolicitud(solicitud);
 
             return ResponseEntity.ok(actualizada);

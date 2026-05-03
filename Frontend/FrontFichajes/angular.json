@@ -82,14 +82,15 @@
         "serve": {
           "builder": "@angular/build:dev-server",
           "options": {
-            "proxyConfig": "proxy.conf.json"
+            
           },
           "configurations": {
             "production": {
               "buildTarget": "FrontFichajes:build:production"
             },
             "development": {
-              "buildTarget": "FrontFichajes:build:development"
+              "buildTarget": "FrontFichajes:build:development",
+              "proxyConfig": "proxy.conf.json"
             }
           },
           "defaultConfiguration": "development"

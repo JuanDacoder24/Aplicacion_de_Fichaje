@@ -13,25 +13,31 @@ public class UserDetailsImpl implements UserDetails {
 
     private int id;
     private String nombre;
+    private String email; 
     private String password;
     private String rol;
 
-    public UserDetailsImpl(int id, String nombre, String password, String rol) {
+    public UserDetailsImpl(int id, String nombre, String email, String password, String rol) {
         this.id = id;
         this.nombre = nombre;
+        this.email = email;  
         this.password = password;
         this.rol = rol;
     }
 
-    // Aqui construimos el UserDetailsImpl a partir de tu entidad Usuarios
     public static UserDetailsImpl build(Usuarios user) {
         return new UserDetailsImpl(
                 user.getId(),
                 user.getNombre(),
+                user.getEmail(),      
                 user.getPasswordHash(),
                 user.getRol().getNombre());
     }
 
+    public String getEmail() {  
+        return email;
+    }
+    
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
         return List.of(new SimpleGrantedAuthority("ROLE_" + rol));
