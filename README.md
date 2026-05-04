@@ -187,12 +187,6 @@ Las contribuciones son bienvenidas. Si quieres mejorar el proyecto:
 
 ---
 
-## 📸 Vista previa (opcional)
-
-*Aquí puedes añadir capturas de pantalla de tu aplicación*
-
----
-
 ## 💡 Nota
 
 Este proyecto forma parte de un desarrollo académico y está enfocado en aprender buenas prácticas de desarrollo full-stack.
