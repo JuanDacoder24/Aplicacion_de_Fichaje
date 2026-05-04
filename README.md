@@ -21,10 +21,10 @@ El objetivo del proyecto es simular un sistema real de control horario utilizado
 
 * 🟢 Registro de entrada y salida en tiempo real
 * 📅 Consulta de fichajes por fecha
-* 👤 Gestión de usuarios (empleados)
+* 👤 Gestión de usuarios 
 * ⏱️ Control de jornada laboral
 * 📊 Historial de fichajes
-* 🔐 Autenticación de usuarios (si la tienes implementada)
+* 🔐 Autenticación de usuarios 
 * ⚡ Interfaz moderna y responsive
 
 ---
