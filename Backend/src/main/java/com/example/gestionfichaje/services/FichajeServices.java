@@ -120,7 +120,7 @@ public class FichajeServices {
     }
 
     public Fichajes registrarSalida(FichajeDTO req) {
-        
+
         LocalDate fecha = LocalDate.parse(req.getFecha());
         Fichajes abierto = findFichajeAbierto(req.getUsuarioId(), fecha);
 
@@ -183,10 +183,6 @@ public class FichajeServices {
         horariosRepository.deleteById(id);
     }
 
-    public Solicitudes saveSolicitud(Solicitudes solicitud) {
-        return solicitudesRepository.save(solicitud);
-    }
-
     public void deleteSolicitud(Integer id) {
         solicitudesRepository.deleteById(id);
     }
@@ -197,11 +193,21 @@ public class FichajeServices {
     }
 
     public Solicitudes getSolicitudById(Integer id) {
-        return solicitudesRepository.findById(id).orElse(null);
+        System.out.println("Buscando solicitud con ID: " + id);
+        Solicitudes solicitud = solicitudesRepository.findById(id).orElse(null);
+        System.out.println("Solicitud encontrada: " + (solicitud != null));
+        return solicitud;
+    }
+
+    public Solicitudes saveSolicitud(Solicitudes solicitud) {
+        System.out.println("Guardando solicitud ID: " + solicitud.getId() +
+                ", Estado: " + solicitud.getEstado());
+        return solicitudesRepository.save(solicitud);
     }
 
     public List<Solicitudes> getSolicitudesByEmail(String identifier) {
-        Usuarios usuario = usuariosRepository.findByEmail(identifier).or(() -> usuariosRepository.findByNombre(identifier))
+        Usuarios usuario = usuariosRepository.findByEmail(identifier)
+                .or(() -> usuariosRepository.findByNombre(identifier))
                 .orElseThrow(() -> new RuntimeException("No se encontró al usuario con: " + identifier));
 
         return solicitudesRepository.findByUsuario(usuario);
@@ -268,22 +274,26 @@ public class FichajeServices {
         }
     }
 
-    public Resource cargarJustificante(Integer id) {
-        try {
-            Justificante j = justificanteRepository.findById(id)
-                    .orElseThrow(() -> new RuntimeException("Justificante no encontrado"));
-            Path ruta = Paths.get(j.getRutaArchivo());
-            Resource resource = new UrlResource(ruta.toUri());
-            if (!resource.exists() || !resource.isReadable())
-                throw new RuntimeException("Archivo no encontrado en disco");
-            return resource;
-        } catch (MalformedURLException e) {
-            throw new RuntimeException("URL inválida: " + e.getMessage());
+    public Resource cargarJustificante(Integer id) throws Exception {
+        Justificante justificante = justificanteRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Justificante no encontrado: " + id));
+
+        Path filePath = Paths.get(justificante.getRutaArchivo());
+
+        if (!Files.exists(filePath)) {
+            throw new RuntimeException("Archivo no encontrado en: " + justificante.getRutaArchivo());
         }
+
+        return new UrlResource(filePath.toUri());
     }
 
     public List<Justificante> getJustificantesPendientes() {
         return justificanteRepository.findByEstado(EstadoJustificante.PENDIENTE);
+    }
+
+    public Justificante getJustificanteById(Integer id) {
+        return justificanteRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Justificante no encontrado: " + id));
     }
 
     public List<Justificante> getAllJustificantes() {
@@ -291,7 +301,10 @@ public class FichajeServices {
     }
 
     public List<Justificante> getMisJustificantes(String email) {
-        return justificanteRepository.findByUsuarioEmail(email);
+        Usuarios usuario = usuariosRepository.findByEmail(email)
+                .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
+
+        return justificanteRepository.findByUsuarioId(usuario.getId());
     }
 
     public Optional<Usuarios> findByEmail(String email) {

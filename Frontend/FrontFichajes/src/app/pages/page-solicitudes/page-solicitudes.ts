@@ -10,8 +10,6 @@ import { IJustificante } from '../../interface/ijustificante';
 import { IUsuario } from '../../interface/iusuario';
 import { IFichajes } from '../../interface/ifichajes';
 
-declare var bootstrap: any;
-
 @Component({
   selector: 'app-page-solicitudes',
   standalone: true,
@@ -25,6 +23,7 @@ export class PageSolicitudes implements OnInit, OnDestroy {
   private authService = inject(AuthService)
   private fichajeService = inject(FichajeService)
   private sanitizer = inject(DomSanitizer)
+  private cargandoSolicitudes = false
 
   cargando = signal<boolean>(false)
   enviando = signal<boolean>(false)
@@ -40,6 +39,8 @@ export class PageSolicitudes implements OnInit, OnDestroy {
   esAdmin = signal<boolean>(false)
   filtroEstado = signal<string>('TODAS')
   comentariosAdmin = signal<Record<number, string>>({})
+
+
 
   nuevaSolicitud = signal({
     tipoDocumento: 'OTROS',
@@ -92,63 +93,65 @@ export class PageSolicitudes implements OnInit, OnDestroy {
   }
 
   async cargarSolicitudes(): Promise<void> {
-  try {
-    
-    if (this.esAdmin()) {
-      const todas = await this.solicitudService.obtenerSolicitudes();
-      this.solicitudes.set(todas || []);
-      const userId = this.authService.id(); 
-      const solicitudesDelAdmin = (todas || []).filter(s => s.usuario?.id === userId);
-      
-      console.log('Solicitudes solo del admin:', solicitudesDelAdmin);
-      this.solicitudesPropias.set(solicitudesDelAdmin); 
-      
-    } else {
-      const propias = await this.solicitudService.obtenerMisSolicitudes();
-      this.solicitudes.set(propias || []);
-      this.solicitudesPropias.set(propias || []);
+    if (this.cargandoSolicitudes) {
+      console.log('Ya está cargando solicitudes, evitando bucle');
+      return;
     }
-    
-    console.log('Signal solicitudes totales:', this.solicitudes());
-    console.log('Signal solicitudes propias:', this.solicitudesPropias());
-    
-  } catch (err) {
-    console.error('Error cargando solicitudes:', err)
-    this.error.set('Error al cargar solicitudes: ' + (err as any).message);
+
+    try {
+      this.cargandoSolicitudes = true;
+
+      if (this.esAdmin()) {
+        const todas = await this.solicitudService.obtenerSolicitudes();
+        this.solicitudes.set(todas || []);
+        const userId = this.authService.id();
+        const solicitudesDelAdmin = (todas || []).filter(s => s.usuario?.id === userId);
+        this.solicitudesPropias.set(solicitudesDelAdmin);
+      } else {
+        const propias = await this.solicitudService.obtenerMisSolicitudes();
+        this.solicitudes.set(propias || []);
+        this.solicitudesPropias.set(propias || []);
+      }
+
+    } catch (err) {
+      console.error('Error cargando solicitudes:', err)
+      this.error.set('Error al cargar solicitudes: ' + (err as any).message);
+    } finally {
+      this.cargandoSolicitudes = false;
+    }
   }
-}
 
   async inicializarComponente(): Promise<void> {
-  try {
-    this.cargando.set(true);
+    try {
+      this.cargando.set(true);
 
-    const esAdmin = this.authService.isAdmin();
-    console.log('esAdmin desde authService:', esAdmin);
+      const esAdmin = this.authService.isAdmin();
+      console.log('esAdmin desde authService:', esAdmin);
 
-    this.esAdmin.set(esAdmin);
+      this.esAdmin.set(esAdmin);
 
-    const userId = this.authService.id();
-    const userName = this.authService.nombre();
-    const userRole = this.authService.rol();
+      const userId = this.authService.id();
+      const userName = this.authService.nombre();
+      const userRole = this.authService.rol();
 
-    console.log('Datos usuario:', { userId, userName, userRole, esAdmin });
+      console.log('Datos usuario:', { userId, userName, userRole, esAdmin });
 
-    
-    await Promise.all([
-      this.cargarSolicitudes(),  
-      this.cargarFichajes()
-    ]);
 
-    if (this.esAdmin()) {
-      await this.cargarJustificantes()
+      await Promise.all([
+        this.cargarSolicitudes(),
+        this.cargarFichajes()
+      ]);
+
+      if (this.esAdmin()) {
+        await this.cargarJustificantes()
+      }
+
+    } catch (err) {
+      console.error('Error al inicializar:', err)
+    } finally {
+      this.cargando.set(false);
     }
-
-  } catch (err) {
-    console.error('Error al inicializar:', err)
-  } finally {
-    this.cargando.set(false);
   }
-}
 
   async cargarJustificantes(): Promise<void> {
     try {
@@ -198,68 +201,75 @@ export class PageSolicitudes implements OnInit, OnDestroy {
   }
 
   async enviarSolicitud(): Promise<void> {
-  const solicitud = this.nuevaSolicitud();
-  
-  if (!solicitud.motivo || !solicitud.motivo.trim()) {
-    this.error.set('El motivo es obligatorio');
-    console.log('Error: motivo vacío');
-    return;
-  }
-  
-  try {
-    this.enviando.set(true);
-    this.error.set('');
-    
-    const fichajeIdParaEnviar = solicitud.fichajeId ? Number(solicitud.fichajeId) : undefined;
-    
-    let solicitudCreada: ISolicitudes;
-    solicitudCreada = await this.solicitudService.crearSolicitud(
-      solicitud.motivo,
-      fichajeIdParaEnviar  
-    );
-    
-    console.log('Solicitud creada:', solicitudCreada);
-    
-    if (this.archivoSeleccionado && solicitudCreada.id) {
-      console.log('Subiendo justificante...');
-      await this.solicitudService.subirJustificante(
-        this.archivoSeleccionado,
-        solicitud.tipoDocumento,
-        solicitudCreada.id,
+    const solicitud = this.nuevaSolicitud();
+
+    if (!solicitud.motivo || !solicitud.motivo.trim()) {
+      this.error.set('El motivo es obligatorio');
+      console.log('Error: motivo vacío');
+      return;
+    }
+
+    try {
+      this.enviando.set(true);
+      this.error.set('');
+
+      const fichajeIdParaEnviar = solicitud.fichajeId ? Number(solicitud.fichajeId) : undefined;
+
+      let solicitudCreada: ISolicitudes;
+      solicitudCreada = await this.solicitudService.crearSolicitud(
+        solicitud.motivo,
         fichajeIdParaEnviar
       );
-    }
-    
-    this.nuevaSolicitud.set({
-      tipoDocumento: 'OTROS',
-      motivo: '',
-      fichajeId: null
-    });
-    this.limpiarArchivo();
-    
-    this.exito.set('Solicitud enviada correctamente');
-    console.log('Solicitud completada con éxito');
-    
-    await this.cargarSolicitudes();
-    
-    setTimeout(() => {
-      if (this.exito() === 'Solicitud enviada correctamente') {
-        this.exito.set('');
+
+      console.log('Solicitud creada:', solicitudCreada);
+
+      if (this.archivoSeleccionado && solicitudCreada.id) {
+        console.log('Subiendo justificante...');
+        await this.solicitudService.subirJustificante(
+          this.archivoSeleccionado,
+          solicitud.tipoDocumento,
+          solicitudCreada.id,
+          fichajeIdParaEnviar
+        );
       }
-    }, 3000);
-    
-  } catch (err: any) {
-    this.error.set(err.message || err.error || 'Error al enviar la solicitud');
-  } finally {
-    this.enviando.set(false);
+
+      this.nuevaSolicitud.set({
+        tipoDocumento: 'OTROS',
+        motivo: '',
+        fichajeId: null
+      });
+      this.limpiarArchivo();
+
+      this.exito.set('Solicitud enviada correctamente');
+      console.log('Solicitud completada con éxito');
+
+      await this.cargarSolicitudes();
+
+      setTimeout(() => {
+        if (this.exito() === 'Solicitud enviada correctamente') {
+          this.exito.set('');
+        }
+      }, 3000);
+
+    } catch (err: any) {
+      this.error.set(err.message || err.error || 'Error al enviar la solicitud');
+    } finally {
+      this.enviando.set(false);
+    }
   }
-}
 
   async aprobarSolicitud(solicitud: ISolicitudes): Promise<void> {
+    if (solicitud.estado !== 'PENDIENTE') {
+      this.error.set('Esta solicitud ya fue revisada');
+      return;
+    }
+
     const comentario = this.comentariosAdmin()[solicitud.id] || ''
 
     try {
       this.cargando.set(true)
+
+      console.log(`Aprobando solicitud ${solicitud.id} con comentario:`, comentario);
 
       await this.solicitudService.revisarSolicitud(
         solicitud.id,
@@ -268,25 +278,18 @@ export class PageSolicitudes implements OnInit, OnDestroy {
       )
 
       this.exito.set('Solicitud aprobada correctamente')
+      await this.cargarSolicitudes()
 
       const nuevosComentarios = { ...this.comentariosAdmin() }
       delete nuevosComentarios[solicitud.id]
       this.comentariosAdmin.set(nuevosComentarios)
-
-      await this.cargarSolicitudes()
-      await this.cargarJustificantes()
-
-      setTimeout(() => {
-        if (this.exito() === 'Solicitud aprobada correctamente') {
-          this.exito.set('')
-        }
-      }, 3000)
 
     } catch (err: any) {
       console.error('Error aprobando solicitud:', err)
       this.error.set(err.message || 'Error al aprobar la solicitud')
     } finally {
       this.cargando.set(false)
+      setTimeout(() => this.exito.set(''), 3000)
     }
   }
 
@@ -330,11 +333,10 @@ export class PageSolicitudes implements OnInit, OnDestroy {
     try {
       const url = this.solicitudService.verPdf(justificanteId)
       this.pdfUrl.set(this.sanitizer.bypassSecurityTrustResourceUrl(url))
-
       const modalElement = document.getElementById('modalPdf')
-      if (modalElement && typeof bootstrap !== 'undefined') {
-        this.modalInstance = new bootstrap.Modal(modalElement)
-        this.modalInstance.show()
+      if (modalElement) {
+
+        window.open(url, '_blank')
       } else {
         window.open(url, '_blank')
       }
@@ -354,16 +356,16 @@ export class PageSolicitudes implements OnInit, OnDestroy {
 
 
   getJustificanteBySolicitud(solicitudId: number): IJustificante | undefined {
-    return this.justificantes().find(j => j.solicitudId === solicitudId || j.solicitud_id === solicitudId)
+    return this.justificantes().find(j => j.solicitudId === solicitudId)
   }
 
   getBadgeClass(estado: string): string {
-    const clases = {
+    const clases: Record<string, string> = {
       'PENDIENTE': 'badge bg-warning text-dark',
       'APROBADA': 'badge bg-success',
       'RECHAZADA': 'badge bg-danger'
-    }
-    return clases[estado as keyof typeof clases] || 'badge bg-secondary'
+    };
+    return clases[estado] || 'badge bg-secondary';
   }
 
   getNombreUsuario(usuario?: IUsuario): string {

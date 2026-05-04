@@ -5,6 +5,7 @@ import java.io.IOException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
 import org.springframework.stereotype.Component;
@@ -48,29 +49,34 @@ public class JwtAuthFilter extends OncePerRequestFilter {
 
         try {
             username = jwtUtil.extractUsername(token);
+            System.out.println(" Email extraído del token: " + username);
         } catch (Exception e) {
-            System.out.println("Error extrayendo username del token: " + e.getMessage());
+            System.out.println(" Error extrayendo username del token: " + e.getMessage());
             filterChain.doFilter(request, response);
             return;
         }
 
         if (username != null && SecurityContextHolder.getContext().getAuthentication() == null) {
-            UserDetailsImpl userDetails = (UserDetailsImpl) userDetailsService.loadUserByUsername(username);
-            if (jwtUtil.isTokenValid(token, userDetails.getEmail())) {
-                UsernamePasswordAuthenticationToken authToken
-                        = new UsernamePasswordAuthenticationToken(
-                                userDetails,
-                                null,
-                                userDetails.getAuthorities()
-                        );
+            try {
+                UserDetails userDetails = userDetailsService.loadUserByUsername(username);
+                if (jwtUtil.isTokenValid(token, userDetails.getUsername())) {
+                    UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(
+                        userDetails,
+                        null,
+                        userDetails.getAuthorities()
+                    );
 
-                authToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
-                SecurityContextHolder.getContext().setAuthentication(authToken);
+                    authToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
+                    SecurityContextHolder.getContext().setAuthentication(authToken);
 
-                System.out.println("Autenticado correctamente: "
-                        + SecurityContextHolder.getContext().getAuthentication().getAuthorities());
-            } else {
-                System.out.println("Token inválido para el usuario: " + username);
+                    System.out.println("Usuario autenticado: " + userDetails.getUsername() + 
+                                     ", Roles: " + userDetails.getAuthorities());
+                } else {
+                    System.out.println("Token inválido para el usuario: " + username);
+                }
+            } catch (Exception e) {
+                System.out.println("Error cargando usuario: " + e.getMessage());
+                e.printStackTrace();
             }
         }
 

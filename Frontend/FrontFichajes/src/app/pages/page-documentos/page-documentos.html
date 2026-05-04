@@ -1,1 +1,215 @@
-<p>page-documentos works!</p>
+<div class="hero-bg">
+  <div class="orb orb-1"></div>
+  <div class="orb orb-2"></div>
+</div>
+
+<div class="page-content">
+  <!-- Header -->
+  <div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+      <h1 class="page-title">
+        <i class="bi bi-file-earmark-pdf-fill text-success me-2"></i>
+        Mis Justificantes
+      </h1>
+      <p class="page-subtitle">
+        @if (esAdmin()) {
+          Vista de administrador - Todos los justificantes
+        } @else {
+          Historial de tus justificantes subidos
+        }
+      </p>
+    </div>
+  </div>
+
+  <!-- Alertas -->
+  @if (error()) {
+    <div class="alert-glass danger">
+      <span><i class="bi bi-exclamation-triangle-fill me-2"></i>{{ error() }}</span>
+      <button class="btn-close-glass" (click)="error.set('')">✕</button>
+    </div>
+  }
+
+  <!-- Stats Cards -->
+  <div class="row g-3 mb-4">
+    <div class="col-md-3">
+      <div class="stat-card-glass">
+        <div class="stat-value">{{ justificantes().length }}</div>
+        <div class="stat-label">Total Justificantes</div>
+      </div>
+    </div>
+    <div class="col-md-3">
+      <div class="stat-card-glass warning">
+        <div class="stat-value">{{ totalPendientes() }}</div>
+        <div class="stat-label">Pendientes</div>
+      </div>
+    </div>
+    <div class="col-md-3">
+      <div class="stat-card-glass success">
+        <div class="stat-value">{{ totalAprobados() }}</div>
+        <div class="stat-label">Aprobados</div>
+      </div>
+    </div>
+    <div class="col-md-3">
+      <div class="stat-card-glass danger">
+        <div class="stat-value">{{ totalRechazados() }}</div>
+        <div class="stat-label">Rechazados</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Filtros -->
+  <div class="card-glass mb-4">
+    <div class="card-glass-header">
+      <h5><i class="bi bi-funnel-fill me-2"></i> Filtrar por estado</h5>
+    </div>
+    <div class="card-glass-body">
+      <div class="btn-group-glass">
+        @for (estado of estadosFiltro; track estado.value) {
+          <button 
+            class="btn-filter"
+            [class.active]="filtroEstado() === estado.value"
+            (click)="filtroEstado.set(estado.value)">
+            <i class="bi" 
+               [class.bi-funnel]="estado.value === 'TODOS'"
+               [class.bi-clock-history]="estado.value === 'PENDIENTE'"
+               [class.bi-check-circle]="estado.value === 'APROBADA'"
+               [class.bi-x-circle]="estado.value === 'RECHAZADA'">
+            </i>
+            {{ estado.label }}
+          </button>
+        }
+      </div>
+    </div>
+  </div>
+
+  <!-- Tabla de justificantes -->
+  <div class="card-glass">
+    <div class="card-glass-header">
+      <h5><i class="bi bi-table me-2"></i> Listado de Justificantes</h5>
+      <span class="text-muted-glass">{{ justificantesFiltrados().length }} registros</span>
+    </div>
+    <div class="card-glass-body p-0">
+      @if (cargando()) {
+        <div class="loading-block">
+          <div class="spinner-lg"></div>
+          <p>Cargando justificantes...</p>
+        </div>
+      } @else if (justificantesFiltrados().length === 0) {
+        <div class="empty-state">
+          <i class="bi bi-folder2-open"></i>
+          <h5>No hay justificantes</h5>
+          <p class="small">
+            @if (filtroEstado() !== 'TODOS') {
+              No hay justificantes con estado "{{ filtroEstado() }}"
+            } @else {
+              Aún no has subido ningún justificante
+            }
+          </p>
+        </div>
+      } @else {
+        <div class="table-responsive">
+          <table class="table-glass">
+            <thead>
+              <tr>
+                <th>Tipo</th>
+                <th>Documento</th>
+                <th>Fecha Subida</th>
+                <th>Estado</th>
+                @if (esAdmin()) {
+                  <th>Usuario</th>
+                }
+                <th>Solicitud</th>
+                <th>Acciones</th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (justificante of justificantesFiltrados(); track justificante.id) {
+                <tr>
+                  <td>
+                    <i class="bi bi-file-earmark-pdf-fill text-danger me-1"></i>
+                    {{ getTipoDocumentoLabel(justificante.tipoDocumento) }}
+                  </td>
+                  <td>
+                    <span title="{{ justificante.nombreArchivo }}">
+                      {{ justificante.nombreArchivo | slice:0:30 }}{{ justificante.nombreArchivo.length > 30 ? '...' : '' }}
+                    </span>
+                  </td>
+                  <td>{{ formatearFecha(justificante.fechaSubida) }}</td>
+                  <td>
+                    <span class="badge-{{ justificante.estado === 'PENDIENTE' ? 'pendiente' : (justificante.estado === 'APROBADA' ? 'aprobada' : 'rechazada') }}">
+                      <i class="bi" 
+                         [class.bi-clock-history]="justificante.estado === 'PENDIENTE'"
+                         [class.bi-check-circle]="justificante.estado === 'APROBADA'"
+                         [class.bi-x-circle]="justificante.estado === 'RECHAZADA'">
+                      </i>
+                      {{ justificante.estado }}
+                    </span>
+                  </td>
+                  @if (esAdmin()) {
+                    <td>
+                      @if (justificante.usuario) {
+                        <div>
+                          <strong>{{ justificante.usuario.nombre || 'N/A' }}</strong>
+                          <br>
+                          <small class="text-muted-glass">{{ justificante.usuario.email }}</small>
+                        </div>
+                      } @else {
+                        <span class="text-muted-glass">ID: {{ justificante.usuarioId }}</span>
+                      }
+                    </td>
+                  }
+                  <td>
+                    @if (justificante.solicitudId) {
+                      <a [routerLink]="['/solicitudes']" [queryParams]="{id: justificante.solicitudId}" 
+                         class="btn-glass btn-glass-success">
+                        <i class="bi bi-file-text"></i> Ver solicitud
+                      </a>
+                    } @else {
+                      <span class="text-muted-glass">
+                        <i class="bi bi-dash-circle"></i> No asociada
+                      </span>
+                    }
+                  </td>
+                  <td>
+                    <button 
+                      class="btn-glass btn-glass-primary"
+                      (click)="abrirPdf(justificante.id)"
+                      title="Ver PDF">
+                      <i class="bi bi-eye"></i> Ver
+                    </button>
+                  </td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+      }
+    </div>
+  </div>
+</div>
+
+<!-- Modal para ver PDF -->
+<div class="modal fade modal-glass" id="modalPdfJustificante" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-xl modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">
+          <i class="bi bi-file-earmark-pdf-fill text-danger me-2"></i>
+          Visualización del Documento
+        </h5>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" (click)="cerrarModal()"></button>
+      </div>
+      <div class="modal-body p-0">
+        @if (pdfUrl()) {
+          <iframe 
+            [src]="pdfUrl()" 
+            width="100%" 
+            height="600px" 
+            frameborder="0"
+            class="w-100">
+          </iframe>
+        }
+      </div>
+    </div>
+  </div>
+</div>

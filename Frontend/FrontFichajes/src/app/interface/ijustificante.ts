@@ -1,16 +1,23 @@
 export interface IJustificante {
-
+  id: number;
+  usuarioId: number;
+  fichajeId?: number | null;
+  solicitudId?: number | null;
+  nombreArchivo: string;
+  tipoDocumento: string;
+  rutaArchivo: string;
+  estado: 'PENDIENTE' | 'APROBADA' | 'RECHAZADA';
+  fechaSubida: string | Date;
+  fechaRevision?: string | Date;
+  revisadoPor?: number;
+  usuario?: {
     id: number;
-    usuario_id: number;
-    fichaje_id?: number | null;
-    solicitud_id?: number | null;
-    solicitudId?: number;
-    nombre_archivo: string;
-    tipo_documento: string;
-    ruta_archivo: string;
-    estado: 'PENDIENTE' | 'APROBADO' | 'RECHAZADO';
-    comentario_admin?: string;
-    fecha_subida: Date;
-    fecha_revision?: Date;
-    revisado_por?: number;
+    nombre: string;
+    email: string;
+  };
+  solicitud?: {
+    id: number;
+    motivo: string;
+    estado: string;
+  };
 }

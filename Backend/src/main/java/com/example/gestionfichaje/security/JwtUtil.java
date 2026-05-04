@@ -3,6 +3,7 @@ package com.example.gestionfichaje.security;
 import java.security.Key;
 import java.util.Date;
 
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Component;
 
 import io.jsonwebtoken.Jwts;
@@ -18,16 +19,15 @@ public class JwtUtil {
         return Keys.hmacShaKeyFor(SECRET_KEY.getBytes());
     }
 
-    // ← Ahora recibe también el rol
-    public String generateToken(String email, String rol) { // Cambia username por email
+    public String generateToken(String email, String rol) { 
     return Jwts.builder()
-            .setSubject(email) // Ahora el subject será el email real
+            .setSubject(email) 
             .claim("rol", rol)
             .setIssuedAt(new Date())
             .setExpiration(new Date(System.currentTimeMillis() + 1000 * 60 * 60 * 10))
             .signWith(getSigningKey(), SignatureAlgorithm.HS256)
             .compact();
-}
+    }
     
 
     public String extractUsername(String token) {
@@ -39,7 +39,6 @@ public class JwtUtil {
                 .getSubject();
     }
 
-    // ← Nuevo método para extraer el rol del token
     public String extractRol(String token) {
         return Jwts.parser()
                 .setSigningKey(getSigningKey())
@@ -50,7 +49,7 @@ public class JwtUtil {
     }
 
     public boolean isTokenValid(String token, String username) {
-        return extractUsername(token).equals(username) && !isTokenExpired(token);
+    return extractUsername(token).equals(username) && !isTokenExpired(token);
     }
 
     private boolean isTokenExpired(String token) {

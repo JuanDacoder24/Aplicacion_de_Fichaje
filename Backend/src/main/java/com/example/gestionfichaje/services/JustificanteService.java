@@ -38,7 +38,7 @@ public class JustificanteService {
     private FichajesRepository fichajesRepository;
 
     public Justificante guardar(MultipartFile archivo, String tipoDocumento,
-                                Integer fichajeId, String emailUsuario) throws IOException {
+            Integer fichajeId, String emailUsuario) throws IOException {
 
         Path dirPath = Paths.get(directorioUpload);
         Files.createDirectories(dirPath);
@@ -65,6 +65,8 @@ public class JustificanteService {
         return justificanteRepository.save(j);
     }
 
+
+
     public Resource cargarArchivo(Integer id) throws IOException {
         Justificante j = justificanteRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Justificante no encontrado"));
@@ -79,7 +81,7 @@ public class JustificanteService {
     }
 
     public Justificante revisar(Integer id, EstadoJustificante estado,
-                                String comentario, String emailAdmin) {
+            String comentario, String emailAdmin) {
         Justificante j = justificanteRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Justificante no encontrado"));
 

@@ -26,6 +26,8 @@ public interface JustificanteRepository extends JpaRepository<Justificante, Inte
     // Por solicitud asociada
     List<Justificante> findBySolicitudId(Integer solicitudId);
 
+    List<Justificante> findByUsuarioId(Integer usuarioId);
+
     // Contar pendientes (para badge/notificación en el panel admin)
     long countByEstado(EstadoJustificante estado);
 }

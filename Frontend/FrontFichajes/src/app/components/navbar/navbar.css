@@ -8,14 +8,6 @@
   position: relative;
 }
 
-.nav-link:hover {
-  color: #2ecc71 !important;
-}
-
-.nav-link-active {
-  color: #fff !important;
-}
-
 .nav-link-active::after {
   content: '';
   position: absolute;
@@ -49,8 +41,8 @@
   top: 16px;
   left: 50%;
   transform: translateX(-50%);
-  width: 90%;
-  max-width: 960px;
+  width: 100%;
+  max-width: 1000px;
   border-radius: 16px;
   border: 1px solid rgba(46, 134, 193, 0.2);
   box-shadow: 0 4px 16px rgba(39,174,96,0.3);

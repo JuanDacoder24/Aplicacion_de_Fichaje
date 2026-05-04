@@ -50,8 +50,8 @@ public class UserDetailsImpl implements UserDetails {
 
     @Override
     public String getUsername() {
-        return nombre;
-    } // login por nombre
+        return email;  
+    } 
 
     @Override
     public boolean isAccountNonExpired() {
@@ -79,5 +79,9 @@ public class UserDetailsImpl implements UserDetails {
 
     public String getRol() {
         return rol;
+    }
+    
+    public String getNombre() {  
+        return nombre;
     }
 }

@@ -68,14 +68,14 @@ public class FichajeController {
                     .orElseThrow(() -> new UsernameNotFoundException("Usuario no encontrado"));
             UserDetailsImpl userDetails = (UserDetailsImpl) userDetailsService.loadUserByUsername(usuario.getEmail());
             if (passwordEncoder.matches(request.getPassword(), userDetails.getPassword())) {
-                String token = jwtUtil.generateToken(userDetails.getEmail(), userDetails.getRol()); // ← getEmail()
+                String token = jwtUtil.generateToken(userDetails.getEmail(), userDetails.getRol());
 
                 return ResponseEntity.ok(Map.of(
                         "token", token,
                         "id", userDetails.getId(),
                         "nombre", userDetails.getUsername(),
-                        "rol", userDetails.getRol()
-                ));
+                        "rol", userDetails.getRol(),
+                        "email", userDetails.getEmail()));
 
             } else {
                 return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Usuario o contraseña incorrectos");
@@ -326,7 +326,7 @@ public class FichajeController {
             }
 
             String email = auth.getName();
-            System.out.println(">>> auth.getName(): " + email);  // ← añade esto
+            System.out.println(">>> auth.getName(): " + email);
             System.out.println(">>> auth.getPrincipal(): " + auth.getPrincipal());
 
             Usuarios usuario = fichajeServices.findByEmail(email).orElse(null);
@@ -348,9 +348,7 @@ public class FichajeController {
     }
 
     @PutMapping("/solicitudes/{id}/revisar")
-    public ResponseEntity<?> revisarSolicitud(
-            @PathVariable Integer id,
-            @RequestBody Map<String, String> body,
+    public ResponseEntity<?> revisarSolicitud(@PathVariable Integer id, @RequestBody Map<String, String> body,
             Authentication auth) {
         try {
             UserDetailsImpl userDetails = (UserDetailsImpl) userDetailsService
@@ -363,17 +361,24 @@ public class FichajeController {
             String estado = body.get("estado");
             String comentario = body.get("comentario");
 
+            if (!"APROBADA".equals(estado) && !"RECHAZADA".equals(estado)) {
+                return ResponseEntity.status(400).body("Estado no válido. Debe ser APROBADA o RECHAZADA");
+            }
+
             Solicitudes solicitud = fichajeServices.getSolicitudById(id);
             if (solicitud == null) {
                 return ResponseEntity.status(404).body("Solicitud no encontrada");
             }
 
             solicitud.setEstado(estado);
+            System.out.println("Comentario admin para solicitud " + id + ": " + comentario);
+
             Solicitudes actualizada = fichajeServices.saveSolicitud(solicitud);
 
             return ResponseEntity.ok(actualizada);
 
         } catch (Exception e) {
+            e.printStackTrace();
             return ResponseEntity.status(500).body("Error al revisar: " + e.getMessage());
         }
     }
@@ -452,12 +457,16 @@ public class FichajeController {
             UserDetailsImpl userDetails = (UserDetailsImpl) userDetailsService
                     .loadUserByUsername(auth.getName());
 
+            System.out.println(">>> auth.getName(): " + auth.getName());
+            System.out.println(">>> rol: " + userDetails.getRol());
+
             if ("ADMIN".equalsIgnoreCase(userDetails.getRol())) {
                 return ResponseEntity.ok(fichajeServices.getAllJustificantes());
             } else {
                 return ResponseEntity.ok(fichajeServices.getMisJustificantes(auth.getName()));
             }
         } catch (Exception e) {
+            e.printStackTrace();
             return ResponseEntity.status(500).body("Error: " + e.getMessage());
         }
     }
@@ -481,13 +490,31 @@ public class FichajeController {
     @GetMapping("/justificantes/{id}/ver")
     public ResponseEntity<?> verJustificante(@PathVariable Integer id, Authentication auth) {
         try {
+            Justificante justificante = fichajeServices.getJustificanteById(id);
+
+            if (justificante == null) {
+                return ResponseEntity.status(404).body("Justificante no encontrado");
+            }
+
+            String email = auth.getName();
+            Usuarios usuario = fichajeServices.findByEmail(email).orElse(null);
+
+
             Resource resource = fichajeServices.cargarJustificante(id);
+
+            if (!resource.exists() || !resource.isReadable()) {
+                return ResponseEntity.status(404).body("Archivo no encontrado o no accesible");
+            }
+
             return ResponseEntity.ok()
                     .contentType(MediaType.APPLICATION_PDF)
-                    .header(HttpHeaders.CONTENT_DISPOSITION, "inline; filename=\"justificante.pdf\"")
+                    .header(HttpHeaders.CONTENT_DISPOSITION,
+                            "inline; filename=\"" + justificante.getNombreArchivo() + "\"")
                     .body(resource);
+
         } catch (Exception e) {
-            return ResponseEntity.status(404).body("Archivo no encontrado");
+            e.printStackTrace();
+            return ResponseEntity.status(500).body("Error al cargar el PDF: " + e.getMessage());
         }
     }
 
