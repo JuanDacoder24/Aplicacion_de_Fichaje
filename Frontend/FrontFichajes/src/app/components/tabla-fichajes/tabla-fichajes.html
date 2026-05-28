@@ -1,0 +1,41 @@
+<div class="table-card">
+  <div class="table-header-custom">
+    <h5><span class="accent">EMPLEADO:</span> {{ empleado() }}</h5>
+  </div>
+  
+  <table class="tabla">
+    <thead>
+      <tr>
+        <th scope="col">Departamento</th>
+        <th scope="col">Fecha</th>
+        <th scope="col">Entrada</th>
+        <th scope="col">Salida</th>
+        <th scope="col">Descanso</th>
+        <th scope="col">Horas</th>
+        <th scope="col" class="text-end">Acciones</th>
+      </tr>
+    </thead>
+    <tbody>
+      @for (f of fichajes(); track f.id) {
+        <tr>
+          <td>
+            <span class="badge-dept">
+              {{ getNombreDepartamento(f) }}
+            </span>
+          </td>
+          <td>{{ formatFecha(f.fecha) }}</td>
+          <td class="td-hora entrada">{{ formatHora(f.horaEntrada) }}</td>
+          <td class="td-hora salida">{{ formatHora(f.horaSalida) }}</td>
+          <td>{{ f.descansoMinutos || 0 }} m</td>
+          <td>
+            <span class="badge-horas">{{ formatHoras(f.horasTrabajadas) }}</span>
+          </td>
+          <td class="td-actions">
+            <button (click)="onEditar.emit(f)" title="Editar">✏️</button>
+            <button (click)="onEliminar.emit(f.id)" title="Eliminar">🗑️</button>
+          </td>
+        </tr>
+      }
+    </tbody>
+  </table>
+</div>

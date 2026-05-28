@@ -4,10 +4,11 @@ import { IFichajes } from '../../interface/ifichajes';
 import { IUsuario } from '../../interface/iusuario';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { TablaFichajes } from '../../components/tabla-fichajes/tabla-fichajes';
 
 @Component({
   selector: 'app-page-fichajes',
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, TablaFichajes],
   templateUrl: './page-fichajes.html',
   styleUrl: './page-fichajes.css',
 })
@@ -33,9 +34,29 @@ export class PageFichajes implements OnInit {
   modalAbierto = signal(false)
 
   fichajeFiltrados = computed(() => {
-    const id = this.filtroUsuarioId()
-    if (!id) return this.fichajes()
-    return this.fichajes().filter(f => f.usuario?.id === id)
+    const idStr = this.filtroUsuarioId()
+    if (!idStr) return this.fichajes()
+
+    const idNum = Number(idStr)
+    return this.fichajes().filter(f => f.usuario?.id === idNum)
+  });
+
+  fichajesAgrupados = computed(() => {
+    const filtrados = this.fichajeFiltrados()
+    const grupos: { [key: string]: IFichajes[] } = {}
+
+    filtrados.forEach(f => {
+      const nombreEmpleado = f.usuario?.nombre || 'Sin nombre'
+      if (!grupos[nombreEmpleado]) {
+        grupos[nombreEmpleado] = []
+      }
+      grupos[nombreEmpleado].push(f)
+    })
+
+    return Object.keys(grupos).map(empleado => ({
+      empleado,
+      fichajes: grupos[empleado]
+    }))
   })
 
   async ngOnInit() {
@@ -72,26 +93,53 @@ export class PageFichajes implements OnInit {
       this.cargando.set(false);
     }
   }
+  
+  abrirEdicion(fichaje: IFichajes): void {
+    if (!fichaje) return;
+    
+    // Clonamos profundamente para que la edición sea 100% limpia
+    this.fichajeEditando.set(structuredClone(fichaje));
+    this.modalAbierto.set(true);
+  }
 
-  abrirEdicion(f: IFichajes) {
-    this.fichajeEditando.set({ ...f })
-    this.modalAbierto.set(true)
+  actualizarCampoFichaje(campo: string, valor: any) {
+    const editando = this.fichajeEditando()
+    if (!editando) return
+
+    this.fichajeEditando.set({
+      ...editando,
+      [campo]: valor
+    })
   }
 
   cerrarModal() {
     this.modalAbierto.set(false)
-    this.fichajeEditando.set(null)
+    setTimeout(() => this.fichajeEditando.set(null), 200)
   }
 
   async guardarEdicion() {
-    const f = this.fichajeEditando()
-    if (!f) return
+    const f = this.fichajeEditando();
+    if (!f) return;
+    
     try {
-      await this.fichajeService.updateFichaje(f.id, f)
-      await this.cargarDatos()
-      this.cerrarModal()
+      const idUsuarioReal = f.usuario?.id 
+      
+      const datosAEnviar = {
+        ...f,
+        usuarioId: idUsuarioReal 
+      };
+
+      console.log('Enviando datos corregidos al servidor:', datosAEnviar);
+
+      await this.fichajeService.updateFichaje(f.id, datosAEnviar);
+      
+      this.cerrarModal();
+      
+      await this.cargarDatos();
+      
     } catch (e) {
-      this.error.set('Error al actualizar el fichaje')
+      this.error.set('Error al actualizar el fichaje');
+      console.error(e);
     }
   }
 
@@ -107,16 +155,12 @@ export class PageFichajes implements OnInit {
 
   formatHora(fecha: Date | string | null): string {
     if (!fecha) return '—'
-    return new Date(fecha).toLocaleTimeString('es-ES', {
-      hour: '2-digit', minute: '2-digit'
-    })
+    return new Date(fecha).toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' })
   }
 
   formatFecha(fecha: Date | string | null): string {
     if (!fecha) return '—'
-    return new Date(fecha).toLocaleDateString('es-ES', {
-      day: '2-digit', month: '2-digit', year: 'numeric'
-    })
+    return new Date(fecha).toLocaleDateString('es-ES', { day: '2-digit', month: '2-digit', year: 'numeric' })
   }
 
   formatHoras(h: number | null): string {

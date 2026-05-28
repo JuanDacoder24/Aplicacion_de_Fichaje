@@ -1,0 +1,113 @@
+/* tabla-fichajes.component.css */
+
+.table-card {
+  background: rgba(255, 255, 255, 0.04) !important;
+  border: 1px solid rgba(255, 255, 255, 0.08) !important;
+  border-radius: 20px;
+  overflow: hidden;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+  margin-bottom: 1rem;
+}
+
+.table-header-custom {
+  background: rgba(255, 255, 255, 0.02);
+  padding: 0.9rem 1.1rem;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.07);
+}
+
+.table-header-custom h5 {
+  font-size: 0.9rem;
+  font-weight: 700;
+  color: #fff;
+  margin: 0;
+}
+
+.accent {
+  background: linear-gradient(90deg, #2e86c1, #2ecc71);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  font-weight: 800;
+}
+
+/* Eliminamos contenedores de scroll raros, la tabla fluye libre */
+.tabla {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 12px; /* Un pelín más pequeña para asegurar que no rompa a lo ancho */
+  background: transparent !important;
+  table-layout: auto;
+}
+
+.tabla tr, .tabla td, .tabla th {
+  background: transparent !important;
+}
+
+.tabla thead th {
+  color: #a8c8d8 !important;
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  padding: 10px 8px; /* Padding más compacto */
+  text-align: left;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.07) !important;
+}
+
+.tabla tbody td {
+  padding: 10px 8px; /* Reducimos espacio vertical y horizontal */
+  color: #cde4ef !important;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.04) !important;
+  vertical-align: middle;
+  white-space: nowrap; /* Evita que las fechas o las horas se partan en dos líneas */
+}
+
+.tabla tbody tr:hover {
+  background: rgba(46, 204, 113, 0.04) !important;
+}
+
+/* Badges más estilizados y estrechos */
+.badge-dept {
+  background: rgba(46, 134, 193, 0.15);
+  border: 1px solid rgba(46, 134, 193, 0.3);
+  color: #5dade2;
+  padding: 2px 6px;
+  border-radius: 4px;
+  font-size: 10px;
+  font-weight: 600;
+}
+
+.badge-horas {
+  background: rgba(46, 204, 113, 0.15);
+  border: 1px solid rgba(46, 204, 113, 0.3);
+  color: #2ecc71;
+  padding: 2px 6px;
+  border-radius: 4px;
+  font-weight: 700;
+}
+
+.td-hora {
+  font-family: monospace;
+}
+.entrada { color: #2ecc71; }
+.salida { color: #e74c3c; }
+
+/* Alineación de iconos de acción al extremo derecho */
+.td-actions {
+  text-align: right;
+  padding-right: 12px !important;
+}
+
+.td-actions button {
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 13px;
+  padding: 0 4px;
+  display: inline-block;
+  transition: transform 0.1s;
+}
+
+.td-actions button:hover {
+  transform: scale(1.2);
+}
