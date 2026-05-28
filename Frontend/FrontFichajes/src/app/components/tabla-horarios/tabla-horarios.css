@@ -1,0 +1,93 @@
+/* tabla-horarios.component.css */
+
+.table-card {
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 20px; /* Un poco más ajustado para tablas pequeñas */
+  overflow: hidden;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+  margin-bottom: 1.5rem;
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.table-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 12px 40px rgba(46, 204, 113, 0.05);
+  border-color: rgba(255, 255, 255, 0.12);
+}
+
+.table-header-custom {
+  background: rgba(255, 255, 255, 0.02);
+  padding: 1rem 1.25rem;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.07);
+}
+
+.table-header-custom h5 {
+  font-size: 0.95rem;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  margin: 0;
+}
+
+.accent {
+  background: linear-gradient(90deg, #2e86c1, #2ecc71);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  font-weight: 800;
+}
+
+.tabla {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+}
+
+.tabla thead th {
+  color: #a8c8d8;
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  padding: 12px 16px;
+  text-align: left;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.07);
+  background: rgba(0, 0, 0, 0.1);
+}
+
+.tabla tbody td {
+  padding: 12px 16px;
+  color: #cde4ef;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+  vertical-align: middle;
+}
+
+.tabla tbody tr:last-child td {
+  border-bottom: none;
+}
+
+.tabla tbody tr {
+  transition: background 0.15s;
+}
+
+.tabla tbody tr:hover {
+  background: rgba(46, 204, 113, 0.04);
+}
+
+.btn-delete {
+  padding: 5px 14px;
+  font-size: 11px;
+  font-weight: 700;
+  color: #e74c3c;
+  background: rgba(231, 76, 60, 0.1);
+  border: 1px solid rgba(231, 76, 60, 0.25);
+  border-radius: 20px;
+  cursor: pointer;
+  transition: background 0.2s, border-color 0.2s, transform 0.1s;
+}
+
+.btn-delete:hover {
+  background: rgba(231, 76, 60, 0.2);
+  border-color: rgba(231, 76, 60, 0.5);
+  transform: scale(1.03);
+}

@@ -1,0 +1,25 @@
+<div class="table-card">
+  <div class="table-header-custom">
+    <h5><span class="accent">EMPLEADO:</span> {{ empleado() }}</h5>
+  </div>
+  
+  <table class="tabla">
+    <thead>
+      <tr>
+        <th>Día</th>
+        <th>Horario</th>
+        <th class="text-end">Acción</th> </tr>
+    </thead>
+    <tbody>
+      @for (h of turnos(); track h.id) {
+        <tr>
+          <td class="fw-bold" style="color: #a8c8d8;">{{ h.diaSemana }}</td>
+          <td>{{ h.horaInicio }} - {{ h.horaFin }}</td>
+          <td class="text-end">
+            <button class="btn-delete" (click)="eliminarHorario(h.id)">Eliminar</button>
+          </td>
+        </tr>
+      }
+    </tbody>
+  </table>
+</div>

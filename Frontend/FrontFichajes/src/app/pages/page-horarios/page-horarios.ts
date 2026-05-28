@@ -3,10 +3,11 @@ import { IHorarios } from '../../interface/ihorarios';
 import { IUsuario } from '../../interface/iusuario';
 import { FichajeService } from '../../services/fichaje-service';
 import { FormsModule } from '@angular/forms';
+import { TablaHorarios } from '../../components/tabla-horarios/tabla-horarios';
 
 @Component({
   selector: 'app-page-horarios',
-  imports: [FormsModule],
+  imports: [FormsModule, TablaHorarios],
   templateUrl: './page-horarios.html',
   styleUrl: './page-horarios.css',
 })
@@ -40,6 +41,23 @@ export class PageHorarios implements OnInit {
 
   async cargarUsuarios() {
     this.usuarios = await this.fichajeService.getUsuarios()
+  }
+
+  get horariosAgrupados() {
+    const grupos: { [key: string]: IHorarios[] } = {};
+    
+    this.horarios.forEach(h => {
+      const nombreEmpleado = h.usuario?.nombre || 'Sin Asignar';
+      if (!grupos[nombreEmpleado]) {
+        grupos[nombreEmpleado] = [];
+      }
+      grupos[nombreEmpleado].push(h);
+    });
+
+    return Object.keys(grupos).map(empleado => ({
+      empleado,
+      turnos: grupos[empleado]
+    }));
   }
 
   async guardar() {

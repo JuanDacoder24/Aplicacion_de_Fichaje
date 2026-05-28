@@ -46,34 +46,21 @@
     </div>
   </div>
 
-  <div class="table-wrapper">
-    <div class="table-card">
-      <table class="tabla">
-        <thead>
-          <tr>
-            <th>Empleado</th>
-            <th>Día</th>
-            <th>Horario</th>
-            <th></th>
-          </tr>
-        </thead>
-        <tbody>
-          @for (h of horarios; track h.id) {
-            <tr>
-              <td class="td-nombre">{{h.usuario?.nombre}}</td>
-              <td>{{h.diaSemana}}</td>
-              <td>{{h.horaInicio}} - {{h.horaFin}}</td>
-              <td>
-                <button class="btn-delete" (click)="eliminar(h.id)">Eliminar</button>
-              </td>
-            </tr>
-          } @empty {
-            <tr>
-              <td colspan="4" class="empty-state">No hay horarios registrados</td>
-            </tr>
-          }
-        </tbody>
-      </table>
+  <div class="table-wrapper container-fluid mt-4">
+    <div class="row">
+      @for (grupo of horariosAgrupados; track grupo.empleado) {
+        <div class="col-12 col-md-6">
+          <app-tabla-horarios 
+            [empleado]="grupo.empleado" 
+            [turnos]="grupo.turnos" 
+            (onEliminar)="eliminar($event)">
+          </app-tabla-horarios>
+        </div>
+      } @empty {
+        <div class="col-12 text-center text-muted py-5 card-glass">
+          <p class="m-0">No hay horarios registrados</p>
+        </div>
+      }
     </div>
   </div>
 </div>
